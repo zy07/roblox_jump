@@ -15,6 +15,14 @@ local function onInputEnded(inputObject, processedEvent)
 	end
 end
 
+local function onInputBegan()
+	if UserInputService:IsKeyDown(Enum.KeyCode.F) then
+		EventCenter:SendEvent(EventCenter.EventType.CTrain)
+	end
+end
+
 UserInputService.InputEnded:Connect(onInputEnded)
+
+UserInputService.InputBegan:Connect(onInputBegan)
 
 return InputManager

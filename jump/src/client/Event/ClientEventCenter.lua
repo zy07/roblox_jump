@@ -2,6 +2,7 @@ local ClientEventCenter = {}
 
 ClientEventCenter.EventType = {
     CAttack = 1,
+    CTrain = 2,
 
     SeverEvent = 10000,
     SAttack = 10001,
@@ -70,7 +71,7 @@ function ClientEventCenter:SendEvent(eventType, ...)
             callback(...)
         end
     else
-        warn("[NG Client] Not found event type "..tostring(eventType).."������")
+        warn("[NG Client] Not found event type "..tostring(eventType))
     end
 end
 

@@ -32,6 +32,10 @@ function StateMachine:AddState(name, state)
 end
 
 function StateMachine:ChangeState(stateName)
+    if curStateName == stateName then
+        return
+    end
+
     if states[stateName] and states[curStateName] then
         states[curStateName]:OnLeave()
         curStateName = stateName
