@@ -62,6 +62,7 @@ function PlayerController:Init()
 		end
 	end
 	playerStateMachine:Run("Idle")
+	playAnim("114685600680382")
 end
 
 -- local function onCharacterAdded(playerCharacter)

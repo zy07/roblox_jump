@@ -11,15 +11,12 @@ function StateBase:new(machine)
 end
 
 function StateBase:OnEnter()
-    print("State On Enter")
 end
 
 function StateBase:OnUpdate()
-    print("State On Update")
 end
 
 function StateBase:OnLeave()
-    print("State On Leave")
 end
 
 function StateBase:ChangeState(stateName)
