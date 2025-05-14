@@ -19,6 +19,8 @@ function PlayerLandState:OnEnter()
 end
 
 function PlayerLandState:OnLeave()
+    Player:SetJumpable(true)
+    Player:SetTrainable(true)
 	Player:SetWalkSpeed(16)
 end
 

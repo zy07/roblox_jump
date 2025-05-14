@@ -2,6 +2,7 @@ local eventHandlerCenter = require(game.ServerScriptService.Server.EventHandlers
 print("Server init, from server!")
 
 local replicatedStorage = game:GetService("ReplicatedStorage")
+local DataStoreService = game:GetService("DataStoreService")
 
 -- 创建远程事件
 local EventSync = Instance.new("RemoteEvent")

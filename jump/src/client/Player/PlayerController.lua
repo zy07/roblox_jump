@@ -9,6 +9,7 @@ local jumpingStateTemplate = require(game.StarterPlayer.StarterPlayerScripts.Bat
 local fallStateTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle.State.Player.PlayerFallState)
 local trainStateTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle.State.Player.PlayerTrainState)
 local landStateTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle.State.Player.PlayerLandState)
+local propertyTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle.Property.Property)
 
 local PlayerController = {}
 
@@ -34,6 +35,9 @@ local animationIds = {
 	"107503732851722", -- Squat
 }
 local animationTracks = {}
+
+-- Property
+local property = propertyTemplate:new()
 
 -- StateMachine
 local playerStateMachine = machineTemplate:new()
@@ -96,6 +100,9 @@ function PlayerController:Init()
 			playerStateMachine:ChangeState("Land")
 		end
 	end)
+
+	property["Strength"] = 0
+	property["Jumpable"] = true
 end
 
 -- local function onCharacterAdded(playerCharacter)
@@ -169,15 +176,27 @@ function PlayerController:Update()
 end
 
 function HandleAttack()
-	playerStateMachine:ChangeState("Jump")
+	local canJump = property["Jumpable"]
+	if canJump then
+		playerStateMachine:ChangeState("Jump")
+	end
 end
 
 function HandleTrain()
-	playerStateMachine:ChangeState("Train")
+	if property["Trainable"] then
+		playerStateMachine:ChangeState("Train")
+	end
 end
 
 function PlayerController:SetWalkSpeed(walkSpeed)
 	humanoid.WalkSpeed = walkSpeed
+end
+
+function PlayerController:SetJumpable(jumpable)
+	property["Jumpable"] = jumpable
+end
+function PlayerController:SetTrainable(trainable)
+	property["Trainable"] = trainable
 end
 
 local OriginPosY = 0
@@ -190,7 +209,8 @@ function PlayerController:Jumping()
 	--goal.CFrame = CFrame.new(humanoidRootPart.CFrame.Position.X, 100, humanoidRootPart.CFrame.Position.Z)
 	
 	local bv1 = Instance.new("VectorForce")
-	bv1.Force = Vector3.new(0, 10000, 0)
+	bv1.Force = Vector3.new(0, 2000000 + property["Strength"] * 2, 0)
+	print("当前的起跳速度为："..bv1.Force.Y)
 	bv1.RelativeTo = Enum.ActuatorRelativeTo.World
 	bv1.Attachment0 = humanoidRootPart:FindFirstChildOfClass("Attachment") or Instance.new("Attachment")
 	bv1.Attachment0.Parent = humanoidRootPart
@@ -203,8 +223,7 @@ function PlayerController:Jumping()
 	local tween = tweenService:Create(bv1, info, goal)
 	tween:Play()
 	task.wait(1)
-	bv1:Destroy()
-	tween:Destroy()
+	bv1:Destroy()tween:Destroy()
 end
 
 function PlayerController:LogJumping()
@@ -217,6 +236,16 @@ end
 
 function PlayerController:ChangeState(state)
 	humanoid:ChangeState(state)
+end
+
+function PlayerController:AddStrength()
+	-- TODO: has other things can add strength
+	property["Strength"] = property["Strength"] + 1
+	self:PrintStrength()
+end
+
+function PlayerController:PrintStrength()
+	print("你的力量现在是："..property["Strength"])
 end
 
 EventCenter:AddCEventListener(EventCenter.EventType.CAttack, HandleAttack)

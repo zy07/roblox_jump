@@ -13,6 +13,8 @@ function PlayerTrainState:new(machine, player)
 end
 
 function PlayerTrainState:OnEnter()
+    Player:SetJumpable(false)
+    Player:SetTrainable(false)
     Player:PlayAnim("107503732851722")
     Player:SetWalkSpeed(0)
     task.wait(1)
@@ -20,8 +22,11 @@ function PlayerTrainState:OnEnter()
 end
 
 function PlayerTrainState:OnLeave()
+    Player:SetJumpable(true)
+    Player:SetTrainable(true)
     Player:StopAnim("107503732851722")
     Player:SetWalkSpeed(16)
+    Player:AddStrength()
 end
 
 return PlayerTrainState

@@ -14,6 +14,8 @@ function PlayerJumpState:new(machine, player)
 end
 
 function PlayerJumpState:OnEnter()
+    Player:SetJumpable(false)
+    Player:SetTrainable(false)
     print("PlayerJumpPrepareState OnEnter")
     Player:PlayAnim("114685600680382", 0.3)
     Player:SetWalkSpeed(0)
