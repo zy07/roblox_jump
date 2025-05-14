@@ -2,6 +2,7 @@ local stateBase = require(game.StarterPlayer.StarterPlayerScripts.State.StateBas
 local PlayerJumpingState = stateBase:new()
 
 local Player = nil
+local LastY = 0
 
 function PlayerJumpingState:new(machine, player)
     local obj = {}
@@ -14,7 +15,21 @@ end
 
 function PlayerJumpingState:OnEnter()
     Player:Jumping()
-    self.stateMachine:ChangeState("Fall")
+end
+
+function PlayerJumpingState:OnUpdate()
+	local curY = Player:GetCurY()
+	if curY < LastY then
+		self.stateMachine:ChangeState("Fall")
+		return
+	end
+	LastY = curY
+	Player:LogJumping()
+end
+
+function PlayerJumpingState:OnLeave()
+	LastY = 0
+    Player:StopAnim("110870700549831")
 end
 
 return PlayerJumpingState

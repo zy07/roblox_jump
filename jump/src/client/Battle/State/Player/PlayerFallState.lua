@@ -13,13 +13,11 @@ function PlayerFallState:new(machine, player)
 end
 
 function PlayerFallState:OnEnter()
-    Player:StopAnim("110870700549831")
-    Player:PlayAnim("125924335703879")
+    Player:PlayAnim("125924335703879", 0.3)
 end
 
 function PlayerFallState:OnLeave()
     Player:StopAnim("125924335703879")
-    Player:SetWalkSpeed(16)
 end
 
 return PlayerFallState

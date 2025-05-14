@@ -15,14 +15,14 @@ end
 
 function PlayerJumpState:OnEnter()
     print("PlayerJumpPrepareState OnEnter")
-    Player:PlayAnim("114685600680382")
+    Player:PlayAnim("114685600680382", 0.3)
     Player:SetWalkSpeed(0)
     task.wait(3)
-    Player:StopAnim("114685600680382")
     Player:PlayAnim("127264515888392")
-    task.wait(0.13)
-    Player:StopAnim("127264515888392")
+    Player:StopAnim("114685600680382")
+    --task.wait(0.1)
     Player:PlayAnim("110870700549831")
+    Player:StopAnim("127264515888392")
     self.stateMachine:ChangeState("Jumping")
 end
 

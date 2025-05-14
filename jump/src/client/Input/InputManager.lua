@@ -7,7 +7,7 @@ local function onInputEnded(inputObject, processedEvent)
 	if processedEvent then return end
 
 	if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
-        EventCenter:SendEvent(EventCenter.EventType.CAttack)
+		EventCenter:SendEvent(EventCenter.EventType.CTrain)
 		
 		print("Left Mouse button was pressed:", inputObject.Position)
 	elseif inputObject.UserInputType == Enum.UserInputType.MouseButton2 then
@@ -16,9 +16,9 @@ local function onInputEnded(inputObject, processedEvent)
 end
 
 local function onInputBegan()
-	if UserInputService:IsKeyDown(Enum.KeyCode.F) then
-		EventCenter:SendEvent(EventCenter.EventType.CTrain)
-	end
+	--if UserInputService:IsKeyDown(Enum.KeyCode.F) then
+	--	EventCenter:SendEvent(EventCenter.EventType.CTrain)
+	--end
 end
 
 UserInputService.InputEnded:Connect(onInputEnded)
