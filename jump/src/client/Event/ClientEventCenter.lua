@@ -6,6 +6,27 @@ ClientEventCenter.EventType = {
 
     SeverEvent = 10000,
     SAttack = 10001,
+
+    -- Data
+    SUpdateStrength = 11001,
+    SUpdateHighestHeight = 11002, -- 更新最高高度数据
+
+    -- Request
+    SRequestStrength = 20001, -- 请求力量
+    SRequestHighestHeight = 20002, -- 请求最高高度
+
+    -- Response
+    SResponseStrength = 30001, -- 返回力量
+    SResponseHighestHeight = 30002, -- 返回最高高度
+
+    --UI
+    CUpdateStrength = 50001, -- 更新显示的力量
+    CStartJump = 50002, -- 开始跳跃
+    CLand = 50003, -- 落地
+    CUpdateHighestHeight = 50004, -- 更新最高高度
+
+    -- GM
+    SForceUpdateStrength = 99001, -- GM 强制更新力量
 }
 
 local event = game.ReplicatedStorage:WaitForChild("GameEventSync")
@@ -23,8 +44,6 @@ event.onClientEvent:Connect(function(eventType, ...)
     local handler = sEventHandlers[eventType]
     if handler then
         handler(...)
-    else
-        warn("[NG Client] Not found eventType "..tostring(eventType))
     end
 end)
 

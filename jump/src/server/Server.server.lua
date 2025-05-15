@@ -1,14 +1,16 @@
 local eventHandlerCenter = require(game.ServerScriptService.Server.EventHandlersCenter)
+local playerDataTemplate = require(game.ServerScriptService.Server.PlayerData)
 print("Server init, from server!")
 
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local DataStoreService = game:GetService("DataStoreService")
+local PlayerData = playerDataTemplate:new(DataStoreService)
 
 -- 创建远程事件
 local EventSync = Instance.new("RemoteEvent")
 EventSync.Name = "GameEventSync"
 EventSync.Parent = game.ReplicatedStorage
-eventHandlerCenter:Init(EventSync)
+eventHandlerCenter:Init(EventSync, PlayerData)
 -- 监听客户端事件
 EventSync.OnServerEvent:Connect(function(player, eventType, ...)
     eventHandlerCenter:HandleEvents(player, eventType, ...)

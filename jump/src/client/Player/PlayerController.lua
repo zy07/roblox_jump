@@ -100,8 +100,11 @@ function PlayerController:Init()
 			playerStateMachine:ChangeState("Land")
 		end
 	end)
+	EventCenter:AddSEventListener(EventCenter.EventType.SResponseStrength, HandleResponseStrength)
+	EventCenter:AddSEventListener(EventCenter.EventType.SResponseHighestHeight, HandleResponseHighestHeight)
+	EventCenter:SendSEvent(EventCenter.EventType.SRequestStrength)
+	EventCenter:SendSEvent(EventCenter.EventType.SRequestHighestHeight)
 
-	property["Strength"] = 0
 	property["Jumpable"] = true
 end
 
@@ -188,6 +191,16 @@ function HandleTrain()
 	end
 end
 
+function HandleResponseStrength(strength)
+	property["Strength"] = strength
+	EventCenter:SendEvent(EventCenter.EventType.CUpdateStrength, strength)
+end
+
+function HandleResponseHighestHeight(highestHeight)
+	property["HighestHeight"] = highestHeight
+	EventCenter:SendEvent(EventCenter.EventType.CUpdateHighestHeight, highestHeight)
+end
+
 function PlayerController:SetWalkSpeed(walkSpeed)
 	humanoid.WalkSpeed = walkSpeed
 end
@@ -209,25 +222,34 @@ function PlayerController:Jumping()
 	--goal.CFrame = CFrame.new(humanoidRootPart.CFrame.Position.X, 100, humanoidRootPart.CFrame.Position.Z)
 	
 	local bv1 = Instance.new("VectorForce")
-	bv1.Force = Vector3.new(0, 2000000 + property["Strength"] * 2, 0)
-	print("当前的起跳速度为："..bv1.Force.Y)
+	bv1.Force = Vector3.new(0, 10000 + property["Strength"] * 2, 0)
+	-- bv1.Force = Vector3.new(0, humanoidRootPart:GetMass() * workspace.Gravity + 1, 0)
 	bv1.RelativeTo = Enum.ActuatorRelativeTo.World
 	bv1.Attachment0 = humanoidRootPart:FindFirstChildOfClass("Attachment") or Instance.new("Attachment")
 	bv1.Attachment0.Parent = humanoidRootPart
 	bv1.Parent = humanoidRootPart
+
+	-- humanoidRootPart.CFrame = CFrame.new(humanoidRootPart.CFrame.Position.X, 1000000, humanoidRootPart.CFrame.Position.Z)
 	
-	local goal = {}
-	goal.Force = Vector3.new(0, 0, 0)
-	local info = TweenInfo.new(0.5, Enum.EasingStyle.Circular, Enum.EasingDirection.Out, 0, false, 0);
-	--local tween = tweenService:Create(humanoidRootPart, info, goal)
-	local tween = tweenService:Create(bv1, info, goal)
-	tween:Play()
-	task.wait(1)
-	bv1:Destroy()tween:Destroy()
+	-- local goal = {}
+	-- goal.Force = Vector3.new(0, 0, 0)
+	-- local info = TweenInfo.new(0.5, Enum.EasingStyle.Circular, Enum.EasingDirection.Out, 0, false, 0);
+	-- --local tween = tweenService:Create(humanoidRootPart, info, goal)
+	-- local tween = tweenService:Create(bv1, info, goal)
+	-- tween:Play()
+	task.wait(0.1)
+	bv1:Destroy()
+	-- tween:Destroy()
 end
 
 function PlayerController:LogJumping()
-	print(humanoidRootPart.CFrame.Position.Y)
+	-- print(humanoidRootPart.CFrame.Position.Y)
+	print(humanoidRootPart.AssemblyLinearVelocity.Y)
+end
+
+function PlayerController:GetSpeedY()
+	EventCenter:SendEvent(EventCenter.EventType.CStartJump, humanoidRootPart.AssemblyLinearVelocity.Y, humanoidRootPart.CFrame.Position.Y, property["HighestHeight"])
+	return humanoidRootPart.AssemblyLinearVelocity.Y
 end
 
 function PlayerController:GetCurY()
@@ -240,15 +262,23 @@ end
 
 function PlayerController:AddStrength()
 	-- TODO: has other things can add strength
-	property["Strength"] = property["Strength"] + 1
-	self:PrintStrength()
+	EventCenter:SendSEvent(EventCenter.EventType.SUpdateStrength)
 end
 
-function PlayerController:PrintStrength()
-	print("你的力量现在是："..property["Strength"])
+function PlayerController:UpdateHighestHeight()
+	EventCenter:SendSEvent(EventCenter.EventType.SUpdateHighestHeight)
 end
 
 EventCenter:AddCEventListener(EventCenter.EventType.CAttack, HandleAttack)
 EventCenter:AddCEventListener(EventCenter.EventType.CTrain, HandleTrain)
+
+function PlayerController:GetProperty(propertyKey)
+	local val = property[propertyKey]
+	if val == nil then
+		warn("Property " .. propertyKey .. " not found")
+		return nil
+	end
+	return property[propertyKey]
+end
 
 return PlayerController
