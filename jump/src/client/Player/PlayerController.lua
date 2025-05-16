@@ -100,10 +100,12 @@ function PlayerController:Init()
 			playerStateMachine:ChangeState("Land")
 		end
 	end)
-	EventCenter:AddSEventListener(EventCenter.EventType.SResponseStrength, HandleResponseStrength)
-	EventCenter:AddSEventListener(EventCenter.EventType.SResponseHighestHeight, HandleResponseHighestHeight)
-	EventCenter:SendSEvent(EventCenter.EventType.SRequestStrength)
-	EventCenter:SendSEvent(EventCenter.EventType.SRequestHighestHeight)
+	EventCenter:AddSEventListener(EventCenter.EventType.SResStrength, HandleResponseStrength)
+	EventCenter:AddSEventListener(EventCenter.EventType.SResHighestHeight, HandleResponseHighestHeight)
+	EventCenter:AddSEventListener(EventCenter.EventType.SResCoin, HandleResponseCoin)
+	EventCenter:SendSEvent(EventCenter.EventType.CReqStrength)
+	EventCenter:SendSEvent(EventCenter.EventType.CReqHighestHeight)
+	EventCenter:SendSEvent(EventCenter.EventType.CRequestCoin)
 
 	property["Jumpable"] = true
 end
@@ -176,6 +178,10 @@ end
 
 function PlayerController:Update()
 	playerStateMachine:Update()
+	local curSpeedY = self:GetSpeedY()
+	if property["Jumping"] then
+		EventCenter:SendEvent(EventCenter.EventType.CJumping, curSpeedY, humanoidRootPart.CFrame.Position.Y, property["HighestHeight"])
+	end 
 end
 
 function HandleAttack()
@@ -201,6 +207,11 @@ function HandleResponseHighestHeight(highestHeight)
 	EventCenter:SendEvent(EventCenter.EventType.CUpdateHighestHeight, highestHeight)
 end
 
+function HandleResponseCoin(coin)
+	property["Coin"] = coin
+	EventCenter:SendEvent(EventCenter.EventType.CUpdateCoin, coin)
+end
+
 function PlayerController:SetWalkSpeed(walkSpeed)
 	humanoid.WalkSpeed = walkSpeed
 end
@@ -208,8 +219,13 @@ end
 function PlayerController:SetJumpable(jumpable)
 	property["Jumpable"] = jumpable
 end
+
 function PlayerController:SetTrainable(trainable)
 	property["Trainable"] = trainable
+end
+
+function PlayerController:SetJumping(jumping)
+	property["Jumping"] = jumping
 end
 
 local OriginPosY = 0
@@ -248,7 +264,6 @@ function PlayerController:LogJumping()
 end
 
 function PlayerController:GetSpeedY()
-	EventCenter:SendEvent(EventCenter.EventType.CStartJump, humanoidRootPart.AssemblyLinearVelocity.Y, humanoidRootPart.CFrame.Position.Y, property["HighestHeight"])
 	return humanoidRootPart.AssemblyLinearVelocity.Y
 end
 
@@ -267,6 +282,14 @@ end
 
 function PlayerController:UpdateHighestHeight()
 	EventCenter:SendSEvent(EventCenter.EventType.SUpdateHighestHeight)
+end
+
+function PlayerController:LeaveLand()
+	self:SetJumpable(true)
+    self:SetTrainable(true)
+    self:SetJumping(false)
+	self:SetWalkSpeed(16)
+	EventCenter:SendEvent(EventCenter.EventType.CLand, property["HighestHeight"])
 end
 
 EventCenter:AddCEventListener(EventCenter.EventType.CAttack, HandleAttack)

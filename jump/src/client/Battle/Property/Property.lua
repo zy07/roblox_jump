@@ -11,5 +11,7 @@ Property["Strength"] = 0
 Property["Jumpable"] = true
 Property["Trainable"] = true
 Property["HighestHeight"] = 0
+Property["Jumping"] = false
+Property["Coin"] = 0
 
 return Property

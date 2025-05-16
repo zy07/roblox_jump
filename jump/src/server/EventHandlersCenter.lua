@@ -1,10 +1,8 @@
 local EventHandlersCenter = {}
 
 local EventSync = nil
-local PlayerData = nil
-function EventHandlersCenter:Init(eventSync, playerData)
+function EventHandlersCenter:Init(eventSync)
     EventSync = eventSync
-    PlayerData = playerData
 end
 
 local players = game:GetService("Players")
@@ -18,15 +16,21 @@ EventHandlersCenter.EventType = {
     SUpdateHighestHeight = 11002, -- 更新最高高度数据
 
     -- Request
-    SRequestStrength = 20001, -- 请求力量
-    SRequestHighestHeight = 20002, -- 请求最高高度
+    CReqStrength = 20001, -- 请求力量
+    CReqHighestHeight = 20002, -- 请求最高高度
+    CRequestCoin = 20003, -- 请求金币
+    CReqUnlockEquipment = 20004, -- 请求装备解锁
+    CReqEquipment = 20005, -- 请求所有装备信息
 
     -- Response
-    SResponseStrength = 30001, -- 返回力量
-    SResponseHighestHeight = 30002, -- 返回最高高度
+    SResStrength = 30001, -- 返回力量
+    SResHighestHeight = 30002, -- 返回最高高度
+    SResCoin = 30003, -- 返回金币
+    SResUpdateEquipment = 30004, -- 更新装备
+    SResUpdateAllEquipment = 30005, -- 更新所有装备信息
 
     -- GM
-    SForceUpdateStrength = 99001, -- GM 强制更新力量
+    CReqForceUpdateStrength = 99001, -- GM 强制更新力量
 }
 
 local EventHandlers = {
@@ -34,34 +38,18 @@ local EventHandlers = {
         print(player.Name.." 123")
         broadcastToNearbyPlayersWithoutSource(player, EventHandlersCenter.EventType.SAttack)
     end,
-    [EventHandlersCenter.EventType.SUpdateStrength] = function(player)
-        PlayerData:UpdateStrength(player.UserId)
-        FirePlayerStrength(player)
-    end,
-    [EventHandlersCenter.EventType.SRequestStrength] = function(player)
-        FirePlayerStrength(player)
-    end,
-    [EventHandlersCenter.EventType.SForceUpdateStrength] = function(player, strength)
-        PlayerData:ForceUpdateStrength(player.UserId, strength)
-        FirePlayerStrength(player)
-    end,
-    [EventHandlersCenter.EventType.SUpdateHighestHeight] = function(player)
-        PlayerData:UpdateHighestHeight(player.UserId, player.Character.HumanoidRootPart.Position.Y)
-        FirePlayerHighestHeight(player)
-    end,
-    [EventHandlersCenter.EventType.SRequestHighestHeight] = function(player)
-        FirePlayerHighestHeight(player)
-    end
 }
 
-function FirePlayerStrength(player)
-    local strength = PlayerData:GetStrength(player.UserId)
-    EventSync:FireClient(player, EventHandlersCenter.EventType.SResponseStrength, strength)
+function EventHandlersCenter:AddEventListener(eventType, callback)
+    if not EventHandlers[eventType] then
+        EventHandlers[eventType] = callback
+    else
+        warn("[NG] Repeated add event type "..tostring(eventType))
+    end
 end
 
-function FirePlayerHighestHeight(player)
-    local val = PlayerData:GetHighestHeight(player.UserId)
-    EventSync:FireClient(player, EventHandlersCenter.EventType.SResponseHighestHeight, val)
+function EventHandlersCenter:FireClient(player, eventType, ...)
+    EventSync:FireClient(player, eventType, ...)
 end
 
 function EventHandlersCenter:HandleEvents(player, eventType, ...)

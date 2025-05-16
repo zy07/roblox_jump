@@ -1,4 +1,5 @@
 local ModPlayers = require(game.StarterPlayer.StarterPlayerScripts.Player.ModPlayers)
+local ModEquipment = require(game.StarterPlayer.StarterPlayerScripts.Module.ModEquipment)
 local ClientEventCenter = require(game.StarterPlayer.StarterPlayerScripts.Event.ClientEventCenter)
 local InputMgr = require(game.StarterPlayer.StarterPlayerScripts.Input.InputManager)
 -- Require Services

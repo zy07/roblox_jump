@@ -28,5 +28,4 @@ function PlayerJumpState:OnEnter()
     self.stateMachine:ChangeState("Jumping")
 end
 
-
 return PlayerJumpState
