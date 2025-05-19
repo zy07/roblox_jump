@@ -21,6 +21,7 @@ EventHandlersCenter.EventType = {
     CRequestCoin = 20003, -- 请求金币
     CReqUnlockEquipment = 20004, -- 请求装备解锁
     CReqEquipment = 20005, -- 请求所有装备信息
+    CReqEquip = 20006, -- 请求装备
 
     -- Response
     SResStrength = 30001, -- 返回力量

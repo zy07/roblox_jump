@@ -5,6 +5,7 @@ local DataStoreService = nil
 local strength = nil
 local highestHeight = nil
 local coin = nil
+local equip = nil
 
 function PlayerData:new(eventCenter, dataStoreService)
     local obj = {}
@@ -15,6 +16,7 @@ function PlayerData:new(eventCenter, dataStoreService)
     strength = DataStoreService:GetDataStore("PlayerStrength")
     highestHeight = DataStoreService:GetDataStore("PlayerHighestHeight")
     coin = DataStoreService:GetDataStore("PlayerCoin")
+    equip = DataStoreService:GetDataStore("PlayerEquipment")
 
     EventCenter:AddEventListener(EventCenter.EventType.SUpdateStrength, HandleUpdateStrength)
     EventCenter:AddEventListener(EventCenter.EventType.CReqStrength, FirePlayerStrength)

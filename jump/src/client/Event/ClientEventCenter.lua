@@ -17,6 +17,7 @@ ClientEventCenter.EventType = {
     CRequestCoin = 20003, -- 请求金币
     CReqUnlockEquipment = 20004, -- 请求装备解锁
     CReqEquipment = 20005, -- 请求所有装备信息
+    CReqEquip = 20006, -- 请求装备
 
     -- Response
     SResStrength = 30001, -- 返回力量
@@ -24,6 +25,7 @@ ClientEventCenter.EventType = {
     SResCoin = 30003, -- 返回金币
     SResUpdateEquipment = 30004, -- 更新装备
     SResUpdateAllEquipment = 30005, -- 更新所有装备信息
+    SResEquip = 30006, -- 返回装备
 
     --UI
     CUpdateStrength = 50001, -- 更新显示的力量
@@ -31,6 +33,7 @@ ClientEventCenter.EventType = {
     CLand = 50003, -- 落地
     CUpdateHighestHeight = 50004, -- 更新最高高度
     CUpdateCoin = 50005, -- 更新金币
+    CUpdateEquipment = 50006, -- 更新装备
 
     -- GM
     CReqForceUpdateStrength = 99001, -- GM 强制更新力量

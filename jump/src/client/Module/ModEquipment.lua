@@ -17,6 +17,7 @@ function HandleUpdateEquipment(newEquipment)
     local equipment = ModEquipment.Equipments[id]
     if equipment then
         ModEquipment.Equipments[id] = newEquipment
+        EventCenter:SendEvent(EventCenter.EventType.CUpdateEquipment, newEquipment)
     end
 end
 
@@ -44,6 +45,13 @@ function ModEquipment:UnlockEquipment(id)
     local equipment = ModEquipment.Equipments[id]
     if equipment then
         EventCenter:SendSEvent(EventCenter.EventType.CReqUnlockEquipment, id)
+    end
+end
+
+function ModEquipment:EquipEquipment(id)
+    local equipment = ModEquipment.Equipments[id]
+    if equipment then
+        EventCenter:SendSEvent(EventCenter.EventType.CReqEquip, id)
     end
 end
 

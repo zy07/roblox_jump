@@ -1,11 +1,11 @@
 local module = {}
 
-	-- module['注释'] = {id="id",name="名称",__EMPTY="中文名（自己看）",icon="图标",price="购买价钱",addStrength="增加力量",initUnlock="初始解锁"}
+	-- module['注释'] = {id="id",name="名称",__EMPTY="中文名（自己看）",icon="图标",price="购买价钱",addStrength="增加力量",initUnlock="初始解锁",prefab="物品路径"}
               
-	module['10001'] = {id=10001,name="Wood",__EMPTY="木头",icon="rbxassetid://121505783028503",price=0,addStrength=1,initUnlock=true}
-	module['10002'] = {id=10002,price=125,addStrength=3}
-	module['10003'] = {id=10003,price=850,addStrength=5}
-	module['10004'] = {id=10004,price=2200,addStrength=10}
+	module['10001'] = {id=10001,name="Wood",__EMPTY="木头",icon="rbxassetid://121505783028503",price=0,addStrength=1,initUnlock=true,prefab="ServerStorage.锻炼器材.木头"}
+	module['10002'] = {id=10002,name="Barbell",__EMPTY="杠铃",price=125,addStrength=3,prefab="ServerStorage.锻炼器材.杠铃"}
+	module['10003'] = {id=10003,name="Chicken",__EMPTY="小鸡",price=850,addStrength=5,prefab="ServerStorage.锻炼器材.小鸡"}
+	module['10004'] = {id=10004,name="Truck",__EMPTY="卡车",price=2200,addStrength=10,prefab="ServerStorage.锻炼器材.卡车"}
 	module['10005'] = {id=10005,price=11000,addStrength=15}
 	module['10006'] = {id=10006,price=45000,addStrength=25}
 	module['10007'] = {id=10007,price=155000,addStrength=50}
