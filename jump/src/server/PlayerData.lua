@@ -1,3 +1,4 @@
+local SharedEvent = require(game.ReplicatedStorage.Shared.EventHandlesCenter)
 local PlayerData = {}
 
 local EventCenter = nil
@@ -18,12 +19,12 @@ function PlayerData:new(eventCenter, dataStoreService)
     coin = DataStoreService:GetDataStore("PlayerCoin")
     equip = DataStoreService:GetDataStore("PlayerEquipment")
 
-    EventCenter:AddEventListener(EventCenter.EventType.SUpdateStrength, HandleUpdateStrength)
-    EventCenter:AddEventListener(EventCenter.EventType.CReqStrength, FirePlayerStrength)
-    EventCenter:AddEventListener(EventCenter.EventType.CReqForceUpdateStrength, ForceUpdateStrength)
-    EventCenter:AddEventListener(EventCenter.EventType.SUpdateHighestHeight, UpdateHighestHeight)
-    EventCenter:AddEventListener(EventCenter.EventType.CReqHighestHeight, FirePlayerHighestHeight)
-    EventCenter:AddEventListener(EventCenter.EventType.CRequestCoin, FirePlayerCoin)
+    EventCenter:AddEventListener(SharedEvent.EventType.SUpdateStrength, HandleUpdateStrength)
+    EventCenter:AddEventListener(SharedEvent.EventType.CReqStrength, FirePlayerStrength)
+    EventCenter:AddEventListener(SharedEvent.EventType.CReqForceUpdateStrength, ForceUpdateStrength)
+    EventCenter:AddEventListener(SharedEvent.EventType.SUpdateHighestHeight, UpdateHighestHeight)
+    EventCenter:AddEventListener(SharedEvent.EventType.CReqHighestHeight, FirePlayerHighestHeight)
+    EventCenter:AddEventListener(SharedEvent.EventType.CRequestCoin, FirePlayerCoin)
 
 	return obj
 end
@@ -123,17 +124,17 @@ end
 
 function FirePlayerStrength(player)
     local strength = GetStrength(player.UserId)
-    EventCenter:FireClient(player, EventCenter.EventType.SResStrength, strength)
+    EventCenter:FireClient(player, SharedEvent.EventType.SResStrength, strength)
 end
 
 function FirePlayerHighestHeight(player)
     local val = GetHighestHeight(player.UserId)
-    EventCenter:FireClient(player, EventCenter.EventType.SResHighestHeight, val)
+    EventCenter:FireClient(player, SharedEvent.EventType.SResHighestHeight, val)
 end
 
 function FirePlayerCoin(player)
     local val = GetCoin(player.UserId)
-    EventCenter:FireClient(player, EventCenter.EventType.SResCoin, val)
+    EventCenter:FireClient(player, SharedEvent.EventType.SResCoin, val)
 end
 
 return PlayerData

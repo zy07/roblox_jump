@@ -1,5 +1,6 @@
 local UIManager = require(game.StarterGui.UIScript.UIManager)
 local EventCenter = require(game.StarterPlayer.StarterPlayerScripts.Event.ClientEventCenter)
+local SharedEvent = require(game.ReplicatedStorage.Shared.EventHandlesCenter)
 local ModEquipment = require(game.StarterPlayer.StarterPlayerScripts.Module.ModEquipment)
 local ui = UIManager:Get("器材背包ui")
 local curSelectEquipment = nil
@@ -21,7 +22,7 @@ itemTemplate.Visible = false
 local equipments = ModEquipment.Equipments
 local equipmentUITemplates = {}
 
-function UpdateEquipmentItem(newTemplate, equipment, _)
+function InitEquipmentItem(newTemplate, equipment, _)
     if equipment.icon ~= nil then
         newTemplate["物品图片"].Image = equipment.icon
     end
@@ -34,6 +35,7 @@ function UpdateEquipmentItem(newTemplate, equipment, _)
     newTemplate["当前装备"].Visible = equipment.Equip
     newTemplate["未购买"].Visible = not equipment.Lock
     newTemplate["选择"].Visible = _ == 1
+    newTemplate.Name = equipment.id
     if _ == 1 then
         curSelectEquipment = newTemplate
         -- 初始化右侧装备
@@ -59,12 +61,31 @@ function UpdateEquipmentItem(newTemplate, equipment, _)
     end)
 end
 
+function UpdateEquipmentItem(newTemplate, equipment, _)
+    if equipment.icon ~= nil then
+        newTemplate["物品图片"].Image = equipment.icon
+    end
+    if equipment.price ~= nil then
+        newTemplate["价钱"]["数量"].Text = equipment.price
+    else
+        newTemplate["价钱"]["数量"].Text = "缺少配置"
+    end
+    newTemplate["价钱"].Visible = equipment.Lock
+    newTemplate["当前装备"].Visible = equipment.Equip
+    newTemplate["未购买"].Visible = not equipment.Lock
+    newTemplate["选择"].Visible = _ == 1
+    newTemplate.Name = equipment.id
+    equipBtn.Visible = not equipment.Equip and not equipment.Lock
+    equipingBtn.Visible = equipment.Equip
+    unlockBtn.Visible = equipment.Lock
+end
+
 for _, equipment in pairs(equipments) do
     
     local newTemplate = itemTemplate:Clone()
     newTemplate.Parent = itemTemplate.Parent
     newTemplate.Visible = true
-    UpdateEquipmentItem(newTemplate, equipment, _)
+    InitEquipmentItem(newTemplate, equipment, _)
     table.insert(equipmentUITemplates, newTemplate)
 end
 
@@ -76,13 +97,21 @@ function HandleUpdateEquipment(newEquipment)
     end
 end
 
+function HandleUpdateAllEquipment()
+    for _, equipment in pairs(equipments) do
+        local template = equipmentUITemplates[_]
+        UpdateEquipmentItem(template, equipment, _)
+    end
+end
+
 EventCenter:AddCEventListener(EventCenter.EventType.CUpdateEquipment, HandleUpdateEquipment)
+EventCenter:AddCEventListener(EventCenter.EventType.CUpdateAllEquipment, HandleUpdateAllEquipment)
 
 equipBtn.Activated:Connect(function(inputObject: InputObject, clickCount: number)
     if curSelectEquipment["当前装备"].Visible == false then
         curSelectEquipment["当前装备"].Visible = true
         equipBtn.Visible = false
         equipingBtn.Visible = true
-        EventCenter:SendSEvent(EventCenter.EventType.CReqEquip, curSelectEquipmentId)
+        EventCenter:SendSEvent(SharedEvent.EventType.CReqEquip, curSelectEquipmentId)
     end
 end)

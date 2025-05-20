@@ -1,4 +1,5 @@
 local EventCenter = require(game.StarterPlayer.StarterPlayerScripts.Event.ClientEventCenter)
+local SharedEvent = require(game.ReplicatedStorage.Shared.EventHandlesCenter)
 local EffectManager = require(game.StarterPlayer.StarterPlayerScripts.Effect.EffectManager)
 local Search = require(game.StarterPlayer.StarterPlayerScripts.Battle.Search.Search)
 local machineTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle.State.Player.PlayerStateMachine)
@@ -10,6 +11,7 @@ local fallStateTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle
 local trainStateTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle.State.Player.PlayerTrainState)
 local landStateTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle.State.Player.PlayerLandState)
 local propertyTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle.Property.Property)
+local ModEquipment = require(game.StarterPlayer.StarterPlayerScripts.Module.ModEquipment)
 
 local PlayerController = {}
 
@@ -25,6 +27,8 @@ local humanoid = nil
 local humanoidRootPart = nil
 local animator = nil
 local animationIds = {
+	"76376945167646", -- without equip idle
+	"93441484014353", -- without equip walk
 	"83155635118048", -- Idle
 	"116855912188391", -- Walk
 	"114685600680382", -- Prepare
@@ -100,12 +104,12 @@ function PlayerController:Init()
 			playerStateMachine:ChangeState("Land")
 		end
 	end)
-	EventCenter:AddSEventListener(EventCenter.EventType.SResStrength, HandleResponseStrength)
-	EventCenter:AddSEventListener(EventCenter.EventType.SResHighestHeight, HandleResponseHighestHeight)
-	EventCenter:AddSEventListener(EventCenter.EventType.SResCoin, HandleResponseCoin)
-	EventCenter:SendSEvent(EventCenter.EventType.CReqStrength)
-	EventCenter:SendSEvent(EventCenter.EventType.CReqHighestHeight)
-	EventCenter:SendSEvent(EventCenter.EventType.CRequestCoin)
+	EventCenter:AddSEventListener(SharedEvent.EventType.SResStrength, HandleResponseStrength)
+	EventCenter:AddSEventListener(SharedEvent.EventType.SResHighestHeight, HandleResponseHighestHeight)
+	EventCenter:AddSEventListener(SharedEvent.EventType.SResCoin, HandleResponseCoin)
+	EventCenter:SendSEvent(SharedEvent.EventType.CReqStrength) 
+	EventCenter:SendSEvent(SharedEvent.EventType.CReqHighestHeight)
+	EventCenter:SendSEvent(SharedEvent.EventType.CRequestCoin)
 
 	property["Jumpable"] = true
 end
@@ -180,7 +184,7 @@ function PlayerController:Update()
 	playerStateMachine:Update()
 	local curSpeedY = self:GetSpeedY()
 	if property["Jumping"] then
-		EventCenter:SendEvent(EventCenter.EventType.CJumping, curSpeedY, humanoidRootPart.CFrame.Position.Y, property["HighestHeight"])
+		EventCenter:SendEvent(SharedEvent.EventType.CJumping, curSpeedY, humanoidRootPart.CFrame.Position.Y, property["HighestHeight"])
 	end 
 end
 
@@ -277,11 +281,11 @@ end
 
 function PlayerController:AddStrength()
 	-- TODO: has other things can add strength
-	EventCenter:SendSEvent(EventCenter.EventType.SUpdateStrength)
+	EventCenter:SendSEvent(SharedEvent.EventType.SUpdateStrength)
 end
 
 function PlayerController:UpdateHighestHeight()
-	EventCenter:SendSEvent(EventCenter.EventType.SUpdateHighestHeight)
+	EventCenter:SendSEvent(SharedEvent.EventType.SUpdateHighestHeight)
 end
 
 function PlayerController:LeaveLand()
