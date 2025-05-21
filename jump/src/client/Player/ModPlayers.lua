@@ -30,4 +30,8 @@ EventCenter:AddCEventListener(EventCenter.EventType.CPlayerChangeState, function
     playerCtrls[localPlayer]:HandleChangeEquipAnim(state)
 end)
 
+EventCenter:AddCEventListener(EventCenter.EventType.CEquipmentChanged, function()
+    playerCtrls[localPlayer]:HandleEuiqpmentChanged()
+end)
+
 return ModPlayers

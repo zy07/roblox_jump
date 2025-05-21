@@ -13,6 +13,8 @@ ClientEventCenter.EventType = {
     CUpdateAllEquipment = 50007, -- 更新所有装备
     CPlayerChangeState = 50008, -- 玩家改变状态
     CPlayerChangeEquipAnim = 50009, -- 玩家改变动画
+    CKeyboard = 50010, -- 玩家按下键盘
+    CEquipmentChanged = 50011, -- 更换装备
 }
 
 local event = game.ReplicatedStorage:WaitForChild("GameEventSync")

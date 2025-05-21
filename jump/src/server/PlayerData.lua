@@ -6,27 +6,37 @@ local DataStoreService = nil
 local strength = nil
 local highestHeight = nil
 local coin = nil
-local equip = nil
+local EquipmentData = nil
 
-function PlayerData:new(eventCenter, dataStoreService)
+function PlayerData:new(eventCenter, equipmentData, dataStoreService)
     local obj = {}
 	self.__index = self
 	setmetatable(obj, self)
     EventCenter = eventCenter
     DataStoreService = dataStoreService
+    EquipmentData = equipmentData
     strength = DataStoreService:GetDataStore("PlayerStrength")
     highestHeight = DataStoreService:GetDataStore("PlayerHighestHeight")
     coin = DataStoreService:GetDataStore("PlayerCoin")
-    equip = DataStoreService:GetDataStore("PlayerEquipment")
 
     EventCenter:AddEventListener(SharedEvent.EventType.SUpdateStrength, HandleUpdateStrength)
     EventCenter:AddEventListener(SharedEvent.EventType.CReqStrength, FirePlayerStrength)
     EventCenter:AddEventListener(SharedEvent.EventType.CReqForceUpdateStrength, ForceUpdateStrength)
+    EventCenter:AddEventListener(SharedEvent.EventType.CReqForceUpdateCoin, ForceUpdateCoin)
     EventCenter:AddEventListener(SharedEvent.EventType.SUpdateHighestHeight, UpdateHighestHeight)
     EventCenter:AddEventListener(SharedEvent.EventType.CReqHighestHeight, FirePlayerHighestHeight)
     EventCenter:AddEventListener(SharedEvent.EventType.CRequestCoin, FirePlayerCoin)
+    EventCenter:AddEventListener(SharedEvent.EventType.CReqUnlockEquipment, HandleReqUnlockEquipment)
 
 	return obj
+end
+
+function HandleReqUnlockEquipment(player, id)
+    local equipment = EquipmentData:GetEquipmentById(id)
+    if equipment.id == id and equipment.Lock and CoinEnough(player, equipment.price) then
+        EquipmentData:UnlockEquipment(player, id)
+        CoinCost(player, equipment.price)
+    end
 end
 
 function GetStrength(playerId)
@@ -45,7 +55,11 @@ function UpdateStrength(playerId)
     local strengthVal = GetStrength(playerId)
     local success, errorMessage = pcall(function()
         -- TODO: 后面这里要计算应该增加多少力量值
+        local equipment = EquipmentData:GetEquipedEquipment()
         local addVal = 1
+        if equipment ~= nil then
+            addVal += equipment.addStrength
+        end
         strength:SetAsync(playerId, strengthVal + addVal)
     end)
     if not success then
@@ -116,6 +130,16 @@ function ForceUpdateStrength(player, strengthVal)
     FirePlayerStrength(player)
 end
 
+function ForceUpdateCoin(player, coinVal)
+    local success, errorMessage = pcall(function()
+        coin:SetAsync(player.UserId, coinVal)
+    end)
+    if not success then
+        print(errorMessage)
+    end
+    FirePlayerCoin(player)
+end
+
 function HandleUpdateStrength(player)
     UpdateStrength(player.UserId)
     FirePlayerStrength(player)
@@ -135,6 +159,32 @@ end
 function FirePlayerCoin(player)
     local val = GetCoin(player.UserId)
     EventCenter:FireClient(player, SharedEvent.EventType.SResCoin, val)
+end
+
+function CoinEnough(player, cost)
+    local val = GetCoin(player.UserId)
+    if val ~= nil and cost ~= nil then
+        local valNum = tonumber(val)
+        local costNum = tonumber(cost)
+        return costNum <= valNum
+    end
+    return false
+end
+
+function CoinCost(player, cost)
+    local val = GetCoin(player.UserId)
+    if val ~= nil and cost ~= nil then
+        local valNum = tonumber(val)
+        local costNum = tonumber(cost)
+        local success, errorMessage = pcall(function()
+            coin:SetAsync(player.UserId, valNum - costNum)
+        end)
+        if not success then
+            print(errorMessage)
+        else
+            FirePlayerCoin(player)
+        end
+    end
 end
 
 return PlayerData

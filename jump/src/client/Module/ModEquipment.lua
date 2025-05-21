@@ -15,15 +15,29 @@ function HandleResEquipmentEquiped(id)
     end
 
     EventCenter:SendEvent(EventCenter.EventType.CUpdateAllEquipment)
+    EventCenter:SendEvent(EventCenter.EventType.CEquipmentChanged)
 end
 
-function HandleUpdateEquipment(newEquipment)
-    local id = newEquipment.id
-    local equipment = ModEquipment.Equipments[id]
-    if equipment then
-        ModEquipment.Equipments[id] = newEquipment
-        EventCenter:SendEvent(EventCenter.EventType.CUpdateEquipment, newEquipment)
+function HandleUnlockEquipment(id)
+    for _, equipment in ModEquipment.Equipments do
+        if equipment.id == id then
+            equipment.Lock = false
+            EventCenter:SendEvent(EventCenter.EventType.CUpdateEquipment, equipment)
+            break
+        end
     end
+end
+
+function HandleResEquipmentLock(lockIds)
+    print(lockIds)
+    for _, equipment in pairs(ModEquipment.Equipments) do
+        for __, lockId in lockIds do
+            if equipment.id == lockId then
+                equipment.Lock = true
+            end
+        end
+    end
+    EventCenter:SendEvent(EventCenter.EventType.CUpdateAllEquipment)
 end
 
 for _, equipment in pairs(EquipmentCfgData) do
@@ -33,11 +47,8 @@ for _, equipment in pairs(EquipmentCfgData) do
     newEquipment.icon = equipment.icon
     newEquipment.addStrength = equipment.addStrength
     newEquipment.prefab = equipment.prefab
-    if equipment.initUnlock == nil then
-        newEquipment.Lock = true
-    else
-        newEquipment.Lock = not equipment.initUnlock
-    end
+    newEquipment.price = equipment.price
+    newEquipment.Lock = false
     newEquipment.Equip = false
     table.insert(ModEquipment.Equipments, newEquipment)
 end
@@ -45,9 +56,11 @@ end
 EventCenter:SendSEvent(SharedEvent.EventType.CReqEquipment)
 
 function ModEquipment:UnlockEquipment(id)
-    local equipment = ModEquipment.Equipments[id]
-    if equipment then
-        EventCenter:SendSEvent(SharedEvent.EventType.CReqUnlockEquipment, id)
+    for _, equipment in ModEquipment.Equipments do
+        if equipment.id == id then
+            EventCenter:SendSEvent(SharedEvent.EventType.CReqUnlockEquipment, id)
+            break
+        end
     end
 end
 
@@ -66,7 +79,8 @@ function ModEquipment:GetEquipedEquipment()
     end
 end
 
-EventCenter:AddSEventListener(SharedEvent.EventType.SResUpdateEquipment, HandleUpdateEquipment)
+EventCenter:AddSEventListener(SharedEvent.EventType.SResUnlockEquipment, HandleUnlockEquipment)
 EventCenter:AddSEventListener(SharedEvent.EventType.SResEquipmentEquiped, HandleResEquipmentEquiped)
+EventCenter:AddSEventListener(SharedEvent.EventType.SResEquipmentLock, HandleResEquipmentLock)
 
 return ModEquipment

@@ -31,20 +31,20 @@ function EquipmentData:new(eventCenter, dataSourceService)
         newEquipment.icon = equipment.icon
         newEquipment.addStrength = equipment.addStrength
         newEquipment.prefab = equipment.prefab
-        local lock = false
+        newEquipment.price = equipment.price
+        local lock = true
         if equipment.initUnlock == nil then
-            lock = false
+            lock = true
         else
             lock = not equipment.initUnlock
         end
         newEquipment.Lock = lock
-        newEquipment.Equip = not lock
+        newEquipment.Equip = not lock   
         table.insert(AllEquipments, newEquipment)
     end
     
     EventCenter:AddEventListener(SharedEvent.EventType.CReqEquipment, HandleReqEquipment)
     EventCenter:AddEventListener(SharedEvent.EventType.CReqEquip, HandleReqEquip)
-    EventCenter:AddEventListener(SharedEvent.EventType.CReqUnlockEquipment, HandleReqUnlockEquipment)
     EventCenter:AddEventListener(SharedEvent.EventType.CReqShowEquip, HandleReqShowEquip)
     EventCenter:AddEventListener(SharedEvent.EventType.CReqHideEquip, HandleReqHideEquip)
 
@@ -66,25 +66,38 @@ function HandleReqEquipment(player)
         EventCenter:FireClient(player, SharedEvent.EventType.SResEquipmentEquiped, value)
     end
 
-    -- local success2, value2 = pcall(function()
-    --     LockedId:GetAsync(player.UserId)
-    -- end)
-    -- if success2 then
-    --     if value2 ~= nil then
-    --         for _, lockId in value2 do
-    --             local curEquip = AllEquipments[lockId]
-    --             curEquip.Lock = true
-    --             AllEquipments[lockId] = curEquip
-    --         end
-    --     else
-    --         for _, e in AllEquipments do
-    --             local lockId = e.id
-    --             local lockIds = {}
-    --             table.insert(lockIds, lockId)
-    --         end
-    --         EventCenter:FireClient(player, EventCenter.EventType.SResUpdateAllEquipment, AllEquipments)
-    --     end
-    -- end
+    -- LockedId:RemoveAsync(player.UserId)
+
+    local success2, value2 = pcall(function()
+        return LockedId:GetAsync(player.UserId)
+    end)
+    if success2 then
+        if value2 ~= nil then
+            for _, lockId in value2 do
+                for index, equipment in AllEquipments do
+                    if lockId == equipment.id then
+                        equipment.Lock = true
+                    end
+                end
+            end
+
+            EventCenter:FireClient(player, SharedEvent.EventType.SResEquipmentLock, value2)
+        else
+            local lockIds = {}
+            for _, e in AllEquipments do
+                local lockId = e.id
+                if e.Lock then
+                    table.insert(lockIds, lockId)
+                end
+            end
+            local success3, errMsg3 = pcall(function()
+                    LockedId:SetAsync(player.UserId, lockIds)
+            end)
+            if success3 then
+                EventCenter:FireClient(player, SharedEvent.EventType.SResEquipmentLock, lockIds)
+            end
+        end
+    end
 end
 
 function HandleReqEquip(player, id)
@@ -101,20 +114,6 @@ function HandleReqEquip(player, id)
         end
         EventCenter:FireClient(player, SharedEvent.EventType.SResEquipmentEquiped, id)
     end
-end
-
-function HandleReqUnlockEquipment(player, id)
-    for _, equipment in AllEquipments do
-        if equipment.id == id and equipment.Lock then
-            equipment.Lock = false
-            EventCenter.FireClient(player, SharedEvent.EventType.SResUpdateEquipment, equipment)
-        end
-    end
-
-    local success, errorMessage = pcall(function()
-        Equipments:SetAsync(player.UserId, AllEquipments)
-    end)
-    
 end
 
 function HandleReqShowEquip(player)
@@ -139,6 +138,44 @@ function HandleReqHideEquip()
         LoadedEquipment:Destroy()
         LoadedEquipment = nil
     end
+end
+
+function EquipmentData:GetEquipedEquipment()
+    for _, equipment in AllEquipments do
+        if equipment.Equip then
+            return equipment
+        end
+    end
+end
+
+function EquipmentData:GetEquipmentById(id)
+    for _, equipment in AllEquipments do
+        if equipment.id == id then
+            return equipment
+        end
+    end
+end
+
+function EquipmentData:UnlockEquipment(player, id)
+    local equipment = self:GetEquipmentById(id)
+    equipment.Lock = false
+    EventCenter:FireClient(player, SharedEvent.EventType.SResUnlockEquipment, id)
+
+    local succ1, lockIds = pcall(function()
+        return LockedId:GetAsync(player.UserId)
+    end)
+    if succ1 then
+        for _, lockId in lockIds do
+            if lockId == id then
+                table.remove(lockIds, _)
+                break;
+            end
+        end
+        local success, errorMessage = pcall(function()
+            LockedId:SetAsync(player.UserId, lockIds)
+        end)
+    end
+
 end
 
 return EquipmentData

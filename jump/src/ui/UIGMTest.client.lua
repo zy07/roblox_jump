@@ -8,3 +8,8 @@ ui['测试']['增加力量'].Activated:Connect(function(inputObject: InputObject
     print("GM Click Add Strength")
     EventCenter:SendSEvent(SharedEvent.EventType.CReqForceUpdateStrength, ui['测试']['输入框']['TextBox'].Text)
 end)
+
+ui['测试']['增加金币'].Activated:Connect(function(inputObject: InputObject, clickCount: number)
+    print("GM Click Add Strength")
+    EventCenter:SendSEvent(SharedEvent.EventType.CReqForceUpdateCoin, ui['测试']['输入框']['TextBox'].Text)
+end)

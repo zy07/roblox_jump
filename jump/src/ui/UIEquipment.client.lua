@@ -91,7 +91,7 @@ end
 
 function HandleUpdateEquipment(newEquipment)
     for _, equipment in equipments do
-        if equipment.id == newEquipment then
+        if equipment.id == newEquipment.id then
             UpdateEquipmentItem(equipmentUITemplates[_], newEquipment, _)
         end
     end
@@ -114,4 +114,8 @@ equipBtn.Activated:Connect(function(inputObject: InputObject, clickCount: number
         equipingBtn.Visible = true
         EventCenter:SendSEvent(SharedEvent.EventType.CReqEquip, curSelectEquipmentId)
     end
+end)
+
+unlockBtn.Activated:Connect(function(inputObject: InputObject, clickCount: number)
+    ModEquipment:UnlockEquipment(curSelectEquipmentId)
 end)

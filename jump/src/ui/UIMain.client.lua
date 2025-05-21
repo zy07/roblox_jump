@@ -39,6 +39,14 @@ EventCenter:AddCEventListener(EventCenter.EventType.CLand, function(highestHeigh
     main['数据栏位']['速度']['文字'].Text = string.format("%.2f m/s", 0)
 end)
 
+EventCenter:AddCEventListener(EventCenter.EventType.CKeyboard, function(keyCode)
+    if keyCode == Enum.KeyCode.One then
+        ClickJump()
+    elseif keyCode == Enum.KeyCode.Two then
+        ClickEquip()
+    end
+end)
+
 
 -- main['跳跃'].Activated:Connect(function(inputObject: InputObject, clickCount: number)
 -- 	EventCenter:SendEvent(EventCenter.EventType.CAttack)
@@ -51,20 +59,28 @@ end)
 main['切换功能栏']['健身器材']['选中'].Visible = false
 main['切换功能栏']['起跳下落']['选中'].Visible = false
 
-main['切换功能栏']['健身器材'].Activated:Connect(function(inputObject: InputObject, clickCount: number)
+function ClickEquip()
     local state = not main['切换功能栏']['健身器材']['选中'].Visible
     main['切换功能栏']['健身器材']['选中'].Visible = state
     if state then
         main['切换功能栏']['起跳下落']['选中'].Visible = false
     end
     EventCenter:SendEvent(EventCenter.EventType.CPlayerChangeState, PlayerController.StateType.EQUIP)
+end
+
+main['切换功能栏']['健身器材'].Activated:Connect(function(inputObject: InputObject, clickCount: number)
+    ClickEquip()
 end)
 
-main['切换功能栏']['起跳下落'].Activated:Connect(function(inputObject: InputObject, clickCount: number)
+function ClickJump()
     local state = not main['切换功能栏']['起跳下落']['选中'].Visible
     main['切换功能栏']['起跳下落']['选中'].Visible = state
     if state then
         main['切换功能栏']['健身器材']['选中'].Visible = false
     end
     EventCenter:SendEvent(EventCenter.EventType.CPlayerChangeState, PlayerController.StateType.JUMP)
+end
+
+main['切换功能栏']['起跳下落'].Activated:Connect(function(inputObject: InputObject, clickCount: number)
+    ClickJump()
 end)

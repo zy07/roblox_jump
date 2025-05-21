@@ -10,6 +10,12 @@ local function onInputEnded(inputObject, processedEvent)
 		EventCenter:SendEvent(EventCenter.EventType.CFire)
 	elseif inputObject.UserInputType == Enum.UserInputType.Touch then
 		EventCenter:SendEvent(EventCenter.EventType.CFire)
+	elseif inputObject.UserInputType == Enum.UserInputType.Keyboard then
+		if inputObject.KeyCode == Enum.KeyCode.One then
+			EventCenter:SendEvent(EventCenter.EventType.CKeyboard, Enum.KeyCode.One)
+		elseif inputObject.KeyCode == Enum.KeyCode.Two then
+			EventCenter:SendEvent(EventCenter.EventType.CKeyboard, Enum.KeyCode.Two)
+		end
 	end
 end
 

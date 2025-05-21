@@ -28,11 +28,13 @@ EventHandlersCenter.EventType = {
     SResStrength = 30001, -- 返回力量
     SResHighestHeight = 30002, -- 返回最高高度
     SResCoin = 30003, -- 返回金币
-    SResUpdateEquipment = 30004, -- 更新装备
+    SResUnlockEquipment = 30004, -- 解锁装备
     SResEquipmentEquiped = 30005, -- 返回装备已装备
+    SResEquipmentLock = 30006, -- 返回目前还是锁定的装备
 
     -- GM
     CReqForceUpdateStrength = 99001, -- GM 强制更新力量
+    CReqForceUpdateCoin = 99002, -- GM 强制更新金币
 }
 
 function EventHandlersCenter:HandleEvents(EventSync, eventType, player, ...)

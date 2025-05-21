@@ -12,8 +12,8 @@ local EventSync = Instance.new("RemoteEvent")
 EventSync.Name = "GameEventSync"
 EventSync.Parent = game.ReplicatedStorage
 eventHandlerCenter:Init(EventSync)
-local PlayerData = playerDataTemplate:new(eventHandlerCenter, DataStoreService)
 local EquipmentData = equipmentDataTemplate:new(eventHandlerCenter, DataStoreService)
+local PlayerData = playerDataTemplate:new(eventHandlerCenter, EquipmentData, DataStoreService)
 -- 监听客户端事件
 EventSync.OnServerEvent:Connect(function(player, eventType, ...)
     eventHandlerCenter:HandleEvents(player, eventType, ...)

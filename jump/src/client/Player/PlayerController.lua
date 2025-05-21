@@ -370,4 +370,10 @@ function PlayerController:HandleChangeEquipAnim(state)
 	animateScript.Parent = Character
 end
 
+function PlayerController:HandleEuiqpmentChanged()
+	if self.CurState == self.StateType.EQUIP then
+        EventCenter:SendSEvent(SharedEvent.EventType.CReqShowEquip)
+    end
+end
+
 return PlayerController
