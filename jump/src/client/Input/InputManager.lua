@@ -7,11 +7,9 @@ local function onInputEnded(inputObject, processedEvent)
 	if processedEvent then return end
 
 	if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
-		EventCenter:SendEvent(EventCenter.EventType.CTrain)
-		
-		print("Left Mouse button was pressed:", inputObject.Position)
-	elseif inputObject.UserInputType == Enum.UserInputType.MouseButton2 then
-		print("Right Mouse button was pressed:", inputObject.Position)
+		EventCenter:SendEvent(EventCenter.EventType.CFire)
+	elseif inputObject.UserInputType == Enum.UserInputType.Touch then
+		EventCenter:SendEvent(EventCenter.EventType.CFire)
 	end
 end
 

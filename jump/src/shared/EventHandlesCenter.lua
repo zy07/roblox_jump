@@ -21,6 +21,8 @@ EventHandlersCenter.EventType = {
     CReqUnlockEquipment = 20004, -- 请求装备解锁
     CReqEquipment = 20005, -- 请求所有装备信息
     CReqEquip = 20006, -- 请求装备
+    CReqShowEquip = 20007, -- 请求显示装备
+    CReqHideEquip = 20008, -- 请求隐藏装备
 
     -- Response
     SResStrength = 30001, -- 返回力量
@@ -28,7 +30,7 @@ EventHandlersCenter.EventType = {
     SResCoin = 30003, -- 返回金币
     SResUpdateEquipment = 30004, -- 更新装备
     SResEquipmentEquiped = 30005, -- 返回装备已装备
-    
+
     -- GM
     CReqForceUpdateStrength = 99001, -- GM 强制更新力量
 }

@@ -15,6 +15,14 @@ local ModEquipment = require(game.StarterPlayer.StarterPlayerScripts.Module.ModE
 
 local PlayerController = {}
 
+PlayerController.StateType = {
+    DEFAULT = 0,
+    EQUIP = 1,
+    JUMP = 2,
+}
+
+PlayerController.CurState = PlayerController.StateType.DEFAULT
+
 -- Services
 local Players = game:GetService("Players")
 local tweenService = game:GetService("TweenService")
@@ -87,10 +95,10 @@ function PlayerController:Init()
 		end
 	end
 	local animateScript = Character:WaitForChild("Animate")
-	animateScript.run.RunAnim.AnimationId = "rbxassetid://116855912188391"
-	animateScript.idle.Animation1.AnimationId = "rbxassetid://83155635118048"
-	animateScript.idle.Animation2.AnimationId = "rbxassetid://83155635118048"
-	animateScript.walk.WalkAnim.AnimationId = "rbxassetid://116855912188391"
+	animateScript.run.RunAnim.AnimationId = "rbxassetid://93441484014353"
+	animateScript.idle.Animation1.AnimationId = "rbxassetid://76376945167646"
+	animateScript.idle.Animation2.AnimationId = "rbxassetid://76376945167646"
+	animateScript.walk.WalkAnim.AnimationId = "rbxassetid://93441484014353"
 	playerStateMachine:Run("Idle")
 	humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
 	local gravity = workspace.Gravity -- 获取当前重力值
@@ -104,14 +112,14 @@ function PlayerController:Init()
 			playerStateMachine:ChangeState("Land")
 		end
 	end)
+	property["Trainable"] = false
+	property["Jumpable"] = false
 	EventCenter:AddSEventListener(SharedEvent.EventType.SResStrength, HandleResponseStrength)
 	EventCenter:AddSEventListener(SharedEvent.EventType.SResHighestHeight, HandleResponseHighestHeight)
 	EventCenter:AddSEventListener(SharedEvent.EventType.SResCoin, HandleResponseCoin)
 	EventCenter:SendSEvent(SharedEvent.EventType.CReqStrength) 
 	EventCenter:SendSEvent(SharedEvent.EventType.CReqHighestHeight)
 	EventCenter:SendSEvent(SharedEvent.EventType.CRequestCoin)
-
-	property["Jumpable"] = true
 end
 
 -- local function onCharacterAdded(playerCharacter)
@@ -184,21 +192,27 @@ function PlayerController:Update()
 	playerStateMachine:Update()
 	local curSpeedY = self:GetSpeedY()
 	if property["Jumping"] then
-		EventCenter:SendEvent(SharedEvent.EventType.CJumping, curSpeedY, humanoidRootPart.CFrame.Position.Y, property["HighestHeight"])
+		EventCenter:SendEvent(EventCenter.EventType.CJumping, curSpeedY, humanoidRootPart.CFrame.Position.Y, property["HighestHeight"])
 	end 
 end
 
+function HandleTrain()
+	print(property)
+	if property["Trainable"] then
+		playerStateMachine:ChangeState("Train")
+	end
+end
+
 function HandleAttack()
-	local canJump = property["Jumpable"]
-	if canJump then
+	print(property)
+	if property["Jumpable"] and not property["Jumping"] then
 		playerStateMachine:ChangeState("Jump")
 	end
 end
 
-function HandleTrain()
-	if property["Trainable"] then
-		playerStateMachine:ChangeState("Train")
-	end
+function HandleFire()
+	HandleTrain()
+	HandleAttack()
 end
 
 function HandleResponseStrength(strength)
@@ -289,15 +303,12 @@ function PlayerController:UpdateHighestHeight()
 end
 
 function PlayerController:LeaveLand()
-	self:SetJumpable(true)
-    self:SetTrainable(true)
     self:SetJumping(false)
 	self:SetWalkSpeed(16)
 	EventCenter:SendEvent(EventCenter.EventType.CLand, property["HighestHeight"])
 end
 
-EventCenter:AddCEventListener(EventCenter.EventType.CAttack, HandleAttack)
-EventCenter:AddCEventListener(EventCenter.EventType.CTrain, HandleTrain)
+EventCenter:AddCEventListener(EventCenter.EventType.CFire, HandleFire)
 
 function PlayerController:GetProperty(propertyKey)
 	local val = property[propertyKey]
@@ -306,6 +317,57 @@ function PlayerController:GetProperty(propertyKey)
 		return nil
 	end
 	return property[propertyKey]
+end
+
+function PlayerController:HandleChangeEquipAnim(state)
+	local preState = self.CurState
+	if state == self.StateType.EQUIP then
+        if self.CurState == self.StateType.EQUIP then
+            EventCenter:SendSEvent(SharedEvent.EventType.CReqHideEquip)
+        else
+            EventCenter:SendSEvent(SharedEvent.EventType.CReqShowEquip)
+        end
+    end
+
+    if self.CurState == self.StateType.EQUIP and state ~= self.StateType.EQUIP then
+        EventCenter:SendSEvent(SharedEvent.EventType.CReqHideEquip)
+    end
+
+    if self.CurState == state then
+        self.CurState = self.StateType.DEFAULT
+    else
+        self.CurState = state
+    end
+
+	if self.CurState == self.StateType.DEFAULT then
+		property["Trainable"] = false
+		property["Jumpable"] = false
+	elseif self.CurState == self.StateType.JUMP then
+		property["Jumpable"] = true
+		property["Trainable"] = false
+	else
+		property["Trainable"] = true
+		property["Jumpable"] = false
+	end
+
+	local animateScript = Character:WaitForChild("Animate")
+	if self.CurState == self.StateType.EQUIP then
+		animateScript.run.RunAnim.AnimationId = "rbxassetid://116855912188391"
+		animateScript.idle.Animation1.AnimationId = "rbxassetid://83155635118048"
+		animateScript.idle.Animation2.AnimationId = "rbxassetid://83155635118048"
+		animateScript.walk.WalkAnim.AnimationId = "rbxassetid://116855912188391"
+	else
+		animateScript.run.RunAnim.AnimationId = "rbxassetid://93441484014353"
+		animateScript.idle.Animation1.AnimationId = "rbxassetid://76376945167646"
+		animateScript.idle.Animation2.AnimationId = "rbxassetid://76376945167646"
+		animateScript.walk.WalkAnim.AnimationId = "rbxassetid://93441484014353"
+	end
+	if (preState == self.StateType.DEFAULT or preState == self.StateType.JUMP) and self.CurState ~= self.StateType.EQUIP then
+		return
+	end
+	animateScript.Parent = nil
+	task.wait()
+	animateScript.Parent = Character
 end
 
 return PlayerController

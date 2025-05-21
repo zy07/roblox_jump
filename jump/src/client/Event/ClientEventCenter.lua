@@ -1,8 +1,7 @@
 local ClientEventCenter = {}
 
 ClientEventCenter.EventType = {
-    CAttack = 1,
-    CTrain = 2,
+    CFire = 1,
 
     --UI
     CUpdateStrength = 50001, -- 更新显示的力量
@@ -12,6 +11,8 @@ ClientEventCenter.EventType = {
     CUpdateCoin = 50005, -- 更新金币
     CUpdateEquipment = 50006, -- 更新装备
     CUpdateAllEquipment = 50007, -- 更新所有装备
+    CPlayerChangeState = 50008, -- 玩家改变状态
+    CPlayerChangeEquipAnim = 50009, -- 玩家改变动画
 }
 
 local event = game.ReplicatedStorage:WaitForChild("GameEventSync")

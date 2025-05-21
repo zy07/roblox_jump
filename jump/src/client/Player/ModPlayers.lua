@@ -1,9 +1,11 @@
 local EventCenter = require(game.StarterPlayer.StarterPlayerScripts.Event.ClientEventCenter)
+local SharedEvent = require(game.ReplicatedStorage.Shared.EventHandlesCenter)
 local playerCtrlTemplate = require(game.StarterPlayer.StarterPlayerScripts.Player.PlayerController)
 local ModPlayers = {}
 local Players = game:GetService("Players")
 local players = Players:GetPlayers()
 local playerCtrls = {}
+local localPlayer = Players.LocalPlayer
 
 local function HandlePlayerAdded(player)
     local playerCtrl = playerCtrlTemplate:new(player)
@@ -23,5 +25,9 @@ function ModPlayers:Update()
         playerCtrl:Update()
     end
 end
+
+EventCenter:AddCEventListener(EventCenter.EventType.CPlayerChangeState, function(state)
+    playerCtrls[localPlayer]:HandleChangeEquipAnim(state)
+end)
 
 return ModPlayers

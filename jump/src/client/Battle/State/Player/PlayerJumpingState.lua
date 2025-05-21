@@ -14,7 +14,6 @@ end
 
 function PlayerJumpingState:OnEnter()
     Player:Jumping()
-    Player:SetJumping(true)
 end
 
 function PlayerJumpingState:OnUpdate()

@@ -1,4 +1,6 @@
 local EventCenter = require(game.StarterPlayer.StarterPlayerScripts.Event.ClientEventCenter)
+local ModPlayers = require(game.StarterPlayer.StarterPlayerScripts.Player.ModPlayers)
+local PlayerController = require(game.StarterPlayer.StarterPlayerScripts.Player.PlayerController)
 local UIManager = require(game.StarterGui.UIScript.UIManager)
 
 local main = UIManager:Get("主界面")
@@ -44,4 +46,25 @@ end)
 
 main['功能按钮自动对齐']['背包'].Activated:Connect(function(inputObject: InputObject, clickCount: number)
     UIManager:Show("器材背包ui")
+end)
+
+main['切换功能栏']['健身器材']['选中'].Visible = false
+main['切换功能栏']['起跳下落']['选中'].Visible = false
+
+main['切换功能栏']['健身器材'].Activated:Connect(function(inputObject: InputObject, clickCount: number)
+    local state = not main['切换功能栏']['健身器材']['选中'].Visible
+    main['切换功能栏']['健身器材']['选中'].Visible = state
+    if state then
+        main['切换功能栏']['起跳下落']['选中'].Visible = false
+    end
+    EventCenter:SendEvent(EventCenter.EventType.CPlayerChangeState, PlayerController.StateType.EQUIP)
+end)
+
+main['切换功能栏']['起跳下落'].Activated:Connect(function(inputObject: InputObject, clickCount: number)
+    local state = not main['切换功能栏']['起跳下落']['选中'].Visible
+    main['切换功能栏']['起跳下落']['选中'].Visible = state
+    if state then
+        main['切换功能栏']['健身器材']['选中'].Visible = false
+    end
+    EventCenter:SendEvent(EventCenter.EventType.CPlayerChangeState, PlayerController.StateType.JUMP)
 end)

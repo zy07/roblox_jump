@@ -8,8 +8,8 @@ function Property:new()
 end
 
 Property["Strength"] = 0
-Property["Jumpable"] = true
-Property["Trainable"] = true
+Property["Jumpable"] = false
+Property["Trainable"] = false
 Property["HighestHeight"] = 0
 Property["Jumping"] = false
 Property["Coin"] = 0

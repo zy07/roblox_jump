@@ -11,6 +11,7 @@ local EquipId = nil
 local EquipedId = nil
 local LockedId = nil
 local AllEquipments = nil
+local LoadedEquipment = nil
 
 function EquipmentData:new(eventCenter, dataSourceService)
     local obj = {}
@@ -44,6 +45,8 @@ function EquipmentData:new(eventCenter, dataSourceService)
     EventCenter:AddEventListener(SharedEvent.EventType.CReqEquipment, HandleReqEquipment)
     EventCenter:AddEventListener(SharedEvent.EventType.CReqEquip, HandleReqEquip)
     EventCenter:AddEventListener(SharedEvent.EventType.CReqUnlockEquipment, HandleReqUnlockEquipment)
+    EventCenter:AddEventListener(SharedEvent.EventType.CReqShowEquip, HandleReqShowEquip)
+    EventCenter:AddEventListener(SharedEvent.EventType.CReqHideEquip, HandleReqHideEquip)
 
 	return obj
 end
@@ -55,12 +58,9 @@ function HandleReqEquipment(player)
     if success then
         for _, equipment in AllEquipments do
             if equipment.id == value then
-                local equipModel = ServerStorage:FindFirstChild("锻炼器材"):FindFirstChild(equipment.prefab)
-                if equipModel then
-                    local equipModelClone = equipModel:Clone()
-                    equipModelClone.Parent = player.Character
-                end
-                break
+                equipment.Equip = true
+            else
+                equipment.Equip = false
             end
         end
         EventCenter:FireClient(player, SharedEvent.EventType.SResEquipmentEquiped, value)
@@ -91,6 +91,16 @@ function HandleReqEquip(player, id)
     local success, errorMessage = pcall(function()
         EquipedId:SetAsync(player.UserId, id)
     end)
+    if success then
+        for _, equipment in AllEquipments do
+            if equipment.id == id then
+                equipment.Equip = true
+            else
+                equipment.Equip = false
+            end
+        end
+        EventCenter:FireClient(player, SharedEvent.EventType.SResEquipmentEquiped, id)
+    end
 end
 
 function HandleReqUnlockEquipment(player, id)
@@ -105,6 +115,30 @@ function HandleReqUnlockEquipment(player, id)
         Equipments:SetAsync(player.UserId, AllEquipments)
     end)
     
+end
+
+function HandleReqShowEquip(player)
+    for _, equipment in AllEquipments do
+        if equipment.Equip then
+            local equipModel = ServerStorage:FindFirstChild("锻炼器材"):FindFirstChild(equipment.prefab)
+            if equipModel then
+                if LoadedEquipment ~= nil then
+                    LoadedEquipment:Destroy()
+                    LoadedEquipment = nil
+                end
+                LoadedEquipment = equipModel:Clone()
+                LoadedEquipment.Parent = player.Character
+            end
+            break
+        end
+    end
+end
+
+function HandleReqHideEquip()
+    if LoadedEquipment ~= nil then
+        LoadedEquipment:Destroy()
+        LoadedEquipment = nil
+    end
 end
 
 return EquipmentData
