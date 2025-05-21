@@ -31,11 +31,13 @@ end
 function HandleResEquipmentLock(lockIds)
     print(lockIds)
     for _, equipment in pairs(ModEquipment.Equipments) do
+        local isLock = false
         for __, lockId in lockIds do
             if equipment.id == lockId then
-                equipment.Lock = true
+                isLock = true
             end
         end
+        equipment.Lock = isLock
     end
     EventCenter:SendEvent(EventCenter.EventType.CUpdateAllEquipment)
 end
@@ -74,6 +76,14 @@ end
 function ModEquipment:GetEquipedEquipment()
     for _, equipment in pairs(ModEquipment.Equipments) do
         if equipment.Equip then
+            return equipment
+        end
+    end
+end
+
+function ModEquipment:GetEquipmentById(id)
+    for _, equipment in pairs(ModEquipment.Equipments) do
+        if equipment.id == id then
             return equipment
         end
     end

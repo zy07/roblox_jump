@@ -45,6 +45,7 @@ local animationIds = {
 	"125924335703879", -- Fall
 	"83173520624654", -- Land
 	"107503732851722", -- Squat
+	"111855132298439", -- Idle2Equip
 }
 local animationTracks = {}
 
@@ -362,12 +363,21 @@ function PlayerController:HandleChangeEquipAnim(state)
 		animateScript.idle.Animation2.AnimationId = "rbxassetid://76376945167646"
 		animateScript.walk.WalkAnim.AnimationId = "rbxassetid://93441484014353"
 	end
+	local animations = animator:GetPlayingAnimationTracks()
+	for _, anim in animations do
+		print(anim.name)
+	end
 	if (preState == self.StateType.DEFAULT or preState == self.StateType.JUMP) and self.CurState ~= self.StateType.EQUIP then
 		return
 	end
-	animateScript.Parent = nil
-	task.wait()
-	animateScript.Parent = Character
+	if (preState == self.StateType.DEFAULT or preState == self.StateType.JUMP) and self.CurState == self.StateType.EQUIP then
+		playAnim("111855132298439", 0.1)
+		task.wait(0.3)
+		stopAnim("111855132298439")
+	end
+	-- animateScript.Parent = nil
+	-- task.wait()
+	-- animateScript.Parent = Character
 end
 
 function PlayerController:HandleEuiqpmentChanged()

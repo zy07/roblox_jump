@@ -73,11 +73,10 @@ function UpdateEquipmentItem(newTemplate, equipment, _)
     newTemplate["价钱"].Visible = equipment.Lock
     newTemplate["当前装备"].Visible = equipment.Equip
     newTemplate["未购买"].Visible = not equipment.Lock
-    newTemplate["选择"].Visible = _ == 1
     newTemplate.Name = equipment.id
-    equipBtn.Visible = not equipment.Equip and not equipment.Lock
-    equipingBtn.Visible = equipment.Equip
-    unlockBtn.Visible = equipment.Lock
+    if equipment.id == curSelectEquipmentId then
+        curSelectEquipment = newTemplate
+    end
 end
 
 for _, equipment in pairs(equipments) do
@@ -95,6 +94,10 @@ function HandleUpdateEquipment(newEquipment)
             UpdateEquipmentItem(equipmentUITemplates[_], newEquipment, _)
         end
     end
+
+    equipBtn.Visible = not curSelectEquipment.Equip and not curSelectEquipment.Lock
+    equipingBtn.Visible = curSelectEquipment.Equip
+    unlockBtn.Visible = curSelectEquipment.Lock
 end
 
 function HandleUpdateAllEquipment()
@@ -102,6 +105,14 @@ function HandleUpdateAllEquipment()
         local template = equipmentUITemplates[_]
         UpdateEquipmentItem(template, equipment, _)
     end
+
+    local selectEquipmentData = ModEquipment:GetEquipmentById(curSelectEquipmentId)
+    if selectEquipmentData == nil then
+        return
+    end
+    equipBtn.Visible = not selectEquipmentData.Equip and not selectEquipmentData.Lock
+    equipingBtn.Visible = selectEquipmentData.Equip
+    unlockBtn.Visible = selectEquipmentData.Lock
 end
 
 EventCenter:AddCEventListener(EventCenter.EventType.CUpdateEquipment, HandleUpdateEquipment)

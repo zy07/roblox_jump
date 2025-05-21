@@ -159,7 +159,6 @@ end
 function EquipmentData:UnlockEquipment(player, id)
     local equipment = self:GetEquipmentById(id)
     equipment.Lock = false
-    EventCenter:FireClient(player, SharedEvent.EventType.SResUnlockEquipment, id)
 
     local succ1, lockIds = pcall(function()
         return LockedId:GetAsync(player.UserId)
@@ -174,8 +173,11 @@ function EquipmentData:UnlockEquipment(player, id)
         local success, errorMessage = pcall(function()
             LockedId:SetAsync(player.UserId, lockIds)
         end)
+        if success then
+            EventCenter:FireClient(player, SharedEvent.EventType.SResUnlockEquipment, id)
+            HandleReqEquip(player, id)
+        end
     end
-
 end
 
 return EquipmentData
