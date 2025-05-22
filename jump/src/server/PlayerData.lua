@@ -1,4 +1,6 @@
 local SharedEvent = require(game.ReplicatedStorage.Shared.EventHandlesCenter)
+local ServerStorage = game:GetService("ServerStorage")
+local Players = game:GetService("Players")
 local PlayerData = {}
 
 local EventCenter = nil
@@ -51,7 +53,8 @@ function GetStrength(playerId)
     end
 end
 
-function UpdateStrength(playerId)
+function UpdateStrength(player)
+    local playerId = player.UserId
     local strengthVal = GetStrength(playerId)
     local success, errorMessage = pcall(function()
         -- TODO: 后面这里要计算应该增加多少力量值
@@ -60,11 +63,18 @@ function UpdateStrength(playerId)
         if equipment ~= nil then
             addVal += equipment.addStrength
         end
+        
         strength:SetAsync(playerId, strengthVal + addVal)
     end)
     if not success then
         print(errorMessage)
     end
+    local trainEffTemplate = ServerStorage:FindFirstChild("特效仓库"):FindFirstChild("训练特效")
+    local trainEff = trainEffTemplate:Clone()
+    trainEff.Parent = player.Character.HumanoidRootPart
+    trainEff.CFrame = player.Character.HumanoidRootPart.CFrame
+    task.wait(1)
+    trainEff:Destroy()
 end
 
 function GetHighestHeight(playerId)
@@ -141,7 +151,7 @@ function ForceUpdateCoin(player, coinVal)
 end
 
 function HandleUpdateStrength(player)
-    UpdateStrength(player.UserId)
+    UpdateStrength(player)
     FirePlayerStrength(player)
 end
 
@@ -186,5 +196,16 @@ function CoinCost(player, cost)
         end
     end
 end
+
+function HandlePlayerAdded(player)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    local trainEffTemplate = ServerStorage:FindFirstChild("特效仓库"):FindFirstChild("训练特效")
+    local trainEff = trainEffTemplate:Clone()
+    trainEff.Parent = player.Character.HumanoidRootPart
+    trainEff.CFrame = player.Character.HumanoidRootPart.CFrame
+end
+
+Players.PlayerAdded:Connect(HandlePlayerAdded)
 
 return PlayerData
