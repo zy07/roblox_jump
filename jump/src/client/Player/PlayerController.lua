@@ -10,6 +10,7 @@ local jumpingStateTemplate = require(game.StarterPlayer.StarterPlayerScripts.Bat
 local fallStateTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle.State.Player.PlayerFallState)
 local trainStateTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle.State.Player.PlayerTrainState)
 local landStateTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle.State.Player.PlayerLandState)
+local walkStateTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle.State.Player.PlayerWalkState)
 local propertyTemplate = require(game.StarterPlayer.StarterPlayerScripts.Battle.Property.Property)
 local ModEquipment = require(game.StarterPlayer.StarterPlayerScripts.Module.ModEquipment)
 
@@ -54,13 +55,14 @@ local property = propertyTemplate:new()
 
 -- StateMachine
 local playerStateMachine = machineTemplate:new()
-local idleState = idleStateTemplate:new(playerStateMachine)
+local idleState = idleStateTemplate:new(playerStateMachine, PlayerController)
 local skillState = skillStateTemplate:new(playerStateMachine)
 local jumpState = jumpStateTemplate:new(playerStateMachine, PlayerController)
 local jumpingState = jumpingStateTemplate:new(playerStateMachine, PlayerController)
 local fallState = fallStateTemplate:new(playerStateMachine, PlayerController)
 local trainState = trainStateTemplate:new(playerStateMachine, PlayerController)
 local landState = landStateTemplate:new(playerStateMachine, PlayerController)
+local walkState = walkStateTemplate:new(playerStateMachine, PlayerController)
 playerStateMachine:AddState("Idle", idleState)
 playerStateMachine:AddState("Skill", skillState)
 playerStateMachine:AddState("Jump", jumpState)
@@ -68,6 +70,7 @@ playerStateMachine:AddState("Jumping", jumpingState)
 playerStateMachine:AddState("Fall", fallState)
 playerStateMachine:AddState("Train", trainState)
 playerStateMachine:AddState("Land", landState)
+playerStateMachine:AddState("Walk", walkState)
 
 function PlayerController:new(player)
 	local obj = {}
@@ -102,6 +105,7 @@ function PlayerController:Init()
 	animateScript.walk.WalkAnim.AnimationId = "rbxassetid://93441484014353"
 	playerStateMachine:Run("Idle")
 	humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
+	humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
 	local gravity = workspace.Gravity -- 获取当前重力值
     
     -- 创建反向力（大小 = 质量 × 重力）
@@ -235,6 +239,10 @@ function PlayerController:SetWalkSpeed(walkSpeed)
 	humanoid.WalkSpeed = walkSpeed
 end
 
+function PlayerController:GetWalkSpeed()
+	return humanoid.WalkSpeed
+end
+
 function PlayerController:SetJumpable(jumpable)
 	property["Jumpable"] = jumpable
 end
@@ -363,10 +371,6 @@ function PlayerController:HandleChangeEquipAnim(state)
 		animateScript.idle.Animation2.AnimationId = "rbxassetid://76376945167646"
 		animateScript.walk.WalkAnim.AnimationId = "rbxassetid://93441484014353"
 	end
-	local animations = animator:GetPlayingAnimationTracks()
-	for _, anim in animations do
-		print(anim.name)
-	end
 	if (preState == self.StateType.DEFAULT or preState == self.StateType.JUMP) and self.CurState ~= self.StateType.EQUIP then
 		return
 	end
@@ -375,14 +379,57 @@ function PlayerController:HandleChangeEquipAnim(state)
 		task.wait(0.3)
 		stopAnim("111855132298439")
 	end
-	-- animateScript.Parent = nil
-	-- task.wait()
-	-- animateScript.Parent = Character
+	animateScript.Parent = nil
+	task.wait()
+	animateScript.Parent = Character
 end
 
 function PlayerController:HandleEuiqpmentChanged()
 	if self.CurState == self.StateType.EQUIP then
         EventCenter:SendSEvent(SharedEvent.EventType.CReqShowEquip)
+    end
+end
+
+function PlayerController:PlayTrainEff()
+    local trainEff = humanoidRootPart:FindFirstChild("训练特效")
+    trainEff.CFrame = CFrame.new(humanoidRootPart.CFrame.X, 0, humanoidRootPart.CFrame.Z)
+    local effChildren = trainEff:GetChildren()
+    for _, child in pairs(effChildren) do
+        child.Enabled = true
+    end
+    
+    task.wait(0.5)
+    
+    for _, child in pairs(effChildren) do
+        child.Enabled = false
+    end
+end
+
+function PlayerController:PlayIdleAnim()
+    self:StopAllDefaultAnim()
+    local idleAnimId = "rbxassetid://76376945167646"
+    if self.CurState == self.StateType.EQUIP then
+        idleAnimId = "rbxassetid://83155635118048"
+    end
+    
+    playAnim(idleAnimId)
+end
+
+function PlayerController:PlayWalkAnim()
+    self:StopAllDefaultAnim()
+    local walkAnimId = "rbxassetid://93441484014353"
+    if self.CurState == self.StateType.EQUIP then
+        walkAnimId = "rbxassetid://116855912188391"
+    end
+    
+    playAnim(walkAnimId)
+end
+
+function PlayerController:StopAllDefaultAnim()
+    local animations = animator:GetPlayingAnimationTracks()
+    for _, anim in animations do
+        anim:Stop()
+    	print(anim.name)
     end
 end
 

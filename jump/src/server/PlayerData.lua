@@ -69,12 +69,6 @@ function UpdateStrength(player)
     if not success then
         print(errorMessage)
     end
-    local trainEffTemplate = ServerStorage:FindFirstChild("特效仓库"):FindFirstChild("训练特效")
-    local trainEff = trainEffTemplate:Clone()
-    trainEff.Parent = player.Character.HumanoidRootPart
-    trainEff.CFrame = player.Character.HumanoidRootPart.CFrame
-    task.wait(1)
-    trainEff:Destroy()
 end
 
 function GetHighestHeight(playerId)
@@ -204,6 +198,11 @@ function HandlePlayerAdded(player)
     local trainEff = trainEffTemplate:Clone()
     trainEff.Parent = player.Character.HumanoidRootPart
     trainEff.CFrame = player.Character.HumanoidRootPart.CFrame
+    
+    local effChildren = trainEff:GetChildren()
+    for _, child in pairs(effChildren) do
+        child.Enabled = false
+    end
 end
 
 Players.PlayerAdded:Connect(HandlePlayerAdded)

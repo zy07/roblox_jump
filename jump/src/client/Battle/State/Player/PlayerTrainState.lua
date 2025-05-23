@@ -15,7 +15,7 @@ end
 function PlayerTrainState:OnEnter()
     Player:SetTrainable(false)
     Player:PlayAnim("107503732851722")
-    Player:SetWalkSpeed(0)
+    Player:PlayTrainEff()
     task.wait(1)
     self.stateMachine:ChangeState("Idle")
 end
@@ -23,7 +23,6 @@ end
 function PlayerTrainState:OnLeave()
     Player:SetTrainable(true)
     Player:StopAnim("107503732851722")
-    Player:SetWalkSpeed(16)
     Player:AddStrength()
 end
 
