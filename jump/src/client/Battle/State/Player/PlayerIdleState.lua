@@ -14,6 +14,9 @@ end
 
 function PlayerIdleState:OnEnter()
     Player:PlayIdleAnim()
+    if Player:CheckAutoTrain() then
+        self.stateMachine:ChangeState("Train")
+    end
 end
 
 function PlayerIdleState:OnUpdate()

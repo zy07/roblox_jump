@@ -14,6 +14,8 @@ end
 
 function PlayerJumpingState:OnEnter()
     Player:Jumping()
+    Player:PlayAnim("110870700549831")
+    Player:PlayEff("起跳特效", 0.5)
 end
 
 function PlayerJumpingState:OnUpdate()
@@ -22,6 +24,10 @@ function PlayerJumpingState:OnUpdate()
         Player:UpdateHighestHeight()
 		self.stateMachine:ChangeState("Fall")
 		return
+    elseif curSpeedY >= 2000 then
+        Player:PlayEffDisableBySelf("跳跃")
+    elseif curSpeedY < 2000 then
+        Player:HideEff("跳跃")
 	end
 end
 

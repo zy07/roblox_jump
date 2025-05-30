@@ -6,7 +6,6 @@ local EquipmentData = {}
 local EventCenter = nil
 local DataStoreService = nil
 
-local Equipments = nil
 local EquipId = nil
 local EquipedId = nil
 local LockedId = nil
@@ -19,7 +18,6 @@ function EquipmentData:new(eventCenter, dataSourceService)
 	setmetatable(obj, self)
     EventCenter = eventCenter
     DataStoreService = dataSourceService
-    Equipments = DataStoreService:GetDataStore("PlayerEquipments")
     EquipedId = DataStoreService:GetDataStore("PlayerEquipedId")
     LockedId = DataStoreService:GetDataStore("PlayerLockedId")
 

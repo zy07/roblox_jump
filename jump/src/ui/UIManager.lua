@@ -6,11 +6,13 @@ local ui = playerGui:WaitForChild("UI")
 local main = ui:WaitForChild("主界面")
 local gm = ui:WaitForChild("开发测试")
 local equipment = ui:WaitForChild("器材背包ui")
+local gainResources = ui:WaitForChild("获得资源")
 
 uis ={
     ["主界面"] = main,
     ["开发测试"] = gm,
     ["器材背包ui"] = equipment,
+    ["获得资源"] = gainResources,
 }
 
 function UIManager:Show(name)

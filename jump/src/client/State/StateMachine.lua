@@ -31,8 +31,12 @@ function StateMachine:AddState(name, state)
     end
 end
 
-function StateMachine:ChangeState(stateName)
-    if curStateName == stateName then
+function StateMachine:ChangeState(stateName, force)
+    if force == nil then
+        force = false
+    end
+
+    if curStateName == stateName and not force then
         return
     end
 

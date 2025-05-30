@@ -14,6 +14,9 @@ end
 
 function PlayerWalkState:OnEnter()
     Player:PlayWalkAnim()
+    if Player:CheckAutoTrain() then
+        self.stateMachine:ChangeState("Train")
+    end
 end
 
 function PlayerWalkState:OnUpdate()

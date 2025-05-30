@@ -15,6 +15,10 @@ ClientEventCenter.EventType = {
     CPlayerChangeEquipAnim = 50009, -- 玩家改变动画
     CKeyboard = 50010, -- 玩家按下键盘
     CEquipmentChanged = 50011, -- 更换装备
+    CStartJumping = 50012, -- 玩家开始跳跃
+    CForceLand = 50013, -- 直接落地
+    CGainResources = 50014, -- 获得资源
+    CAutoTrain = 50015, -- 自动锻炼
 }
 
 local event = game.ReplicatedStorage:WaitForChild("GameEventSync")

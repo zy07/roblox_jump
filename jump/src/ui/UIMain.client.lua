@@ -7,6 +7,8 @@ local main = UIManager:Get("主界面")
 
 main['数据栏位']['现在高度']['文字'].Text = string.format("%.2f m", 0)
 main['数据栏位']['速度']['文字'].Text = string.format("%.2f m/s", 0)
+main['自动锻炼开'].Visible = false
+main['自动锻炼关'].Visible = false
 
 EventCenter:AddCEventListener(EventCenter.EventType.CUpdateStrength, function(strength)
     main['资源栏对齐']['力量资源条']['力量剩余'].Text = strength
@@ -37,6 +39,7 @@ EventCenter:AddCEventListener(EventCenter.EventType.CLand, function(highestHeigh
     main['数据栏位']['最高高度']['文字'].Text = string.format("%.2f m", highestHeight)
     main['数据栏位']['现在高度']['文字'].Text = string.format("%.2f m", 0)
     main['数据栏位']['速度']['文字'].Text = string.format("%.2f m/s", 0)
+    main['立即下落'].Visible = false
 end)
 
 EventCenter:AddCEventListener(EventCenter.EventType.CKeyboard, function(keyCode)
@@ -45,6 +48,10 @@ EventCenter:AddCEventListener(EventCenter.EventType.CKeyboard, function(keyCode)
     elseif keyCode == Enum.KeyCode.Two then
         ClickEquip()
     end
+end)
+
+EventCenter:AddCEventListener(EventCenter.EventType.CStartJumping, function()
+    main['立即下落'].Visible = true
 end)
 
 
@@ -62,6 +69,7 @@ main['切换功能栏']['起跳下落']['选中'].Visible = false
 function ClickEquip()
     local state = not main['切换功能栏']['健身器材']['选中'].Visible
     main['切换功能栏']['健身器材']['选中'].Visible = state
+    main['自动锻炼开'].Visible = state
     if state then
         main['切换功能栏']['起跳下落']['选中'].Visible = false
     end
@@ -75,6 +83,8 @@ end)
 function ClickJump()
     local state = not main['切换功能栏']['起跳下落']['选中'].Visible
     main['切换功能栏']['起跳下落']['选中'].Visible = state
+    main['自动锻炼开'].Visible = false
+    main['自动锻炼关'].Visible = false
     if state then
         main['切换功能栏']['健身器材']['选中'].Visible = false
     end
@@ -83,4 +93,20 @@ end
 
 main['切换功能栏']['起跳下落'].Activated:Connect(function(inputObject: InputObject, clickCount: number)
     ClickJump()
+end)
+
+main['立即下落'].Activated:Connect(function(inputObject: InputObject, clickCount: number)
+    EventCenter:SendEvent(EventCenter.EventType.CForceLand)
+end)
+
+main['自动锻炼开'].Activated:Connect(function(inputObject:InputObject, clickCount:number)
+    main['自动锻炼开'].Visible = false
+    main['自动锻炼关'].Visible = true
+    EventCenter:SendEvent(EventCenter.EventType.CAutoTrain, true)
+end)
+
+main['自动锻炼关'].Activated:Connect(function(inputObject:InputObject, clickCount:number)
+    main['自动锻炼开'].Visible = true
+    main['自动锻炼关'].Visible = false
+    EventCenter:SendEvent(EventCenter.EventType.CAutoTrain, false)
 end)

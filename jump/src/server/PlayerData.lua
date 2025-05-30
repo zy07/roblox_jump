@@ -9,6 +9,8 @@ local strength = nil
 local highestHeight = nil
 local coin = nil
 local EquipmentData = nil
+local addedPlayers = {}
+local saveDataTimer = 60
 
 function PlayerData:new(eventCenter, equipmentData, dataStoreService)
     local obj = {}
@@ -42,6 +44,11 @@ function HandleReqUnlockEquipment(player, id)
 end
 
 function GetStrength(playerId)
+    if addedPlayers[playerId] then
+        return addedPlayers[playerId]["strength"]
+    end
+
+
     local success, strengthVal = pcall(function()
         return strength:GetAsync(playerId)
     end)
@@ -56,22 +63,28 @@ end
 function UpdateStrength(player)
     local playerId = player.UserId
     local strengthVal = GetStrength(playerId)
-    local success, errorMessage = pcall(function()
-        -- TODO: 后面这里要计算应该增加多少力量值
-        local equipment = EquipmentData:GetEquipedEquipment()
-        local addVal = 1
-        if equipment ~= nil then
-            addVal += equipment.addStrength
-        end
-        
-        strength:SetAsync(playerId, strengthVal + addVal)
-    end)
-    if not success then
-        print(errorMessage)
+    local equipment = EquipmentData:GetEquipedEquipment()
+    local addVal = 1
+    if equipment ~= nil then
+        addVal += equipment.addStrength
     end
+    if addedPlayers[playerId] then
+        addedPlayers[playerId]["strength"] = strengthVal + addVal
+    end
+
+    -- local success, errorMessage = pcall(function()
+    --     -- TODO: 后面这里要计算应该增加多少力量值
+    --     strength:SetAsync(playerId, strengthVal + addVal)
+    -- end)
+    -- if not success then
+    --     print(errorMessage)
+    -- end
 end
 
 function GetHighestHeight(playerId)
+    if addedPlayers[playerId] then
+        return addedPlayers[playerId]["highestheight"]
+    end
     local success, val = pcall(function()
         return highestHeight:GetAsync(playerId)
     end)
@@ -86,22 +99,32 @@ end
 function UpdateHighestHeight(player)
     local playerId = player.UserId
     local height = player.Character.HumanoidRootPart.CFrame.Position.Y
-    AddCoin(playerId, height)
-    local success, errorMessage = pcall(function()
-        local oldHeight = highestHeight:GetAsync(playerId)
-        if oldHeight == nil or height > oldHeight then
-            highestHeight:SetAsync(playerId, height)
+    if addedPlayers[playerId] then
+        local curHighestHeight = GetHighestHeight()
+        if curHighestHeight < height then
+            addedPlayers[playerId]["highestheight"] = height
         end
-    end)
-    if not success then
-        print(errorMessage)
     end
+    AddCoin(playerId, height)
+    -- local success, errorMessage = pcall(function()
+    --     local oldHeight = highestHeight:GetAsync(playerId)
+    --     if oldHeight == nil or height > oldHeight then
+    --         highestHeight:SetAsync(playerId, height)
+    --     end
+    -- end)
+    -- if not success then
+    --     print(errorMessage)
+    -- end
 
     FirePlayerHighestHeight(player)
     FirePlayerCoin(player)
 end
 
 function GetCoin(playerId)
+    if addedPlayers[playerId] then
+        return addedPlayers[playerId]["coin"]
+    end
+
     local success, val = pcall(function()
         return coin:GetAsync(playerId)
     end)
@@ -116,31 +139,42 @@ end
 -- 结算金币
 function AddCoin(playerId, height)
     local curCoin = GetCoin(playerId)
-    local success, errorMessage = pcall(function()
-        coin:SetAsync(playerId, curCoin + math.ceil(height))
-    end)
-    if not success then
-        print(errorMessage)
+    if addedPlayers[playerId] then
+        addedPlayers[playerId]["coin"] = curCoin + math.ceil(height)
     end
+    -- local success, errorMessage = pcall(function()
+    --     coin:SetAsync(playerId, curCoin + math.ceil(height))
+    -- end)
+    -- if not success then
+    --     print(errorMessage)
+    -- end
 end
 
 function ForceUpdateStrength(player, strengthVal)
-    local success, errorMessage = pcall(function()
-        strength:SetAsync(player.UserId, strengthVal)
-    end)
-    if not success then
-        print(errorMessage)
+    local playerId = player.UserId
+    if addedPlayers[playerId] then
+        addedPlayers[playerId]["strength"] = strengthVal
     end
+    -- local success, errorMessage = pcall(function()
+    --     strength:SetAsync(player.UserId, strengthVal)
+    -- end)
+    -- if not success then
+    --     print(errorMessage)
+    -- end
     FirePlayerStrength(player)
 end
 
 function ForceUpdateCoin(player, coinVal)
-    local success, errorMessage = pcall(function()
-        coin:SetAsync(player.UserId, coinVal)
-    end)
-    if not success then
-        print(errorMessage)
+    local playerId = player.UserId
+    if addedPlayers[playerId] then
+        addedPlayers[playerId]["coin"] = coinVal
     end
+    -- local success, errorMessage = pcall(function()
+    --     coin:SetAsync(player.UserId, coinVal)
+    -- end)
+    -- if not success then
+    --     print(errorMessage)
+    -- end
     FirePlayerCoin(player)
 end
 
@@ -192,17 +226,95 @@ function CoinCost(player, cost)
 end
 
 function HandlePlayerAdded(player)
+    PlayerAddedInitData(player)
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-    local trainEffTemplate = ServerStorage:FindFirstChild("特效仓库"):FindFirstChild("训练特效")
-    local trainEff = trainEffTemplate:Clone()
-    trainEff.Parent = player.Character.HumanoidRootPart
-    trainEff.CFrame = player.Character.HumanoidRootPart.CFrame
-    
-    local effChildren = trainEff:GetChildren()
-    for _, child in pairs(effChildren) do
-        child.Enabled = false
+    AttachEffect("训练特效", humanoidRootPart)
+    AttachEffect("准备起跳特效", humanoidRootPart)
+    AttachEffect("落地特效", humanoidRootPart)
+    AttachEffect("起跳特效", humanoidRootPart)
+    AttachEffect("跳跃", humanoidRootPart)
+end
+
+function PlayerAddedInitData(player)
+    if not addedPlayers[player.UserId] then
+        local coinVal = GetCoin(player.UserId)
+        local strengthVal = GetStrength(player.UserId)
+        local heightestheightVal = GetHighestHeight(player.UserId)
+
+        addedPlayers[player.UserId] = {
+            ["coin"] = coinVal,
+            ["strength"] = strengthVal,
+            ["highestheight"] = heightestheightVal,
+        }
     end
+end
+
+function AttachEffect(effectName, humanoidRootPart)
+    local effTemplate = ServerStorage:FindFirstChild("特效仓库"):FindFirstChild(effectName)
+    local eff = effTemplate:Clone()
+    eff.Parent = humanoidRootPart
+    if eff:IsA("Part") then
+        eff.CFrame = humanoidRootPart.CFrame
+    end
+    EnableChildren(eff, false)
+    -- local effChildren = eff:GetChildren()
+    -- for _, child in pairs(effChildren) do
+    --     if child:IsA("ParticleEmitter") then
+    --         child.Enabled = false
+    --     end
+    -- end
+end
+
+function EnableChildren(parent, enable)
+    local children = parent:GetChildren()
+    local childrenCnt = #parent:GetChildren()
+    if childrenCnt <= 0 then
+        return
+    end
+    for _, child in pairs(children) do
+        if child:IsA("ParticleEmitter") then
+            child.Enabled = enable
+        end
+        EnableChildren(child, enable)
+    end
+end
+
+function SaveData()
+    for _, playerdata in addedPlayers do
+        local success, errorMessage = pcall(function()
+            coin:SetAsync(_, playerdata["coin"])
+        end)
+        if not success then
+            print(errorMessage)
+        end
+
+        local success, errorMessage = pcall(function()
+            highestHeight:SetAsync(_, playerdata["highestheight"])
+        end)
+        if not success then
+            print(errorMessage)
+        end
+
+        local success, errorMessage = pcall(function()
+            strength:SetAsync(_, playerdata["strength"])
+        end)
+        if not success then
+            print(errorMessage)
+        end
+    end
+end
+
+function PlayerData:Update(dt)
+    saveDataTimer -= dt
+    if saveDataTimer <= 0 then
+        saveDataTimer = 60
+        SaveData()
+    end
+end
+
+function PlayerData:SaveData()
+    SaveData()
 end
 
 Players.PlayerAdded:Connect(HandlePlayerAdded)

@@ -14,7 +14,10 @@ end
 
 function PlayerLandState:OnEnter()
     Player:PlayAnim("83173520624654")
-    task.wait(1)
+    Player:PlayEff("落地特效", 0.1)
+    task.wait(0.9)
+    Player:StopAnim("83173520624654")
+    Player:FixedStateAfterLand()
     self.stateMachine:ChangeState("Idle")
 end
 
